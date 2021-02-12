@@ -1304,8 +1304,8 @@ int split_amber_mol(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
 		}
 	}
 
-	mol_percieve(&lig,0);
-	mol_percieve(&prot,0);
+	mol_percieve(&lig);
+	mol_percieve(&prot);
 
 	*mylig = lig;
 	*myprot = prot;
