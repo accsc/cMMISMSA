@@ -521,7 +521,8 @@ mol_percieve (MOL2 ** mymol)
   if (mols->n_atoms <= 300)
     get_number_of_rings2 (mols[0], &ringer, &aro);
   else{
-      for( rnum = 0; rnum < 500; rnum++)
+      
+      for( rnum = 0; rnum < 1000; rnum++)
          process_rings_residue(&mols, rnum);
   }
 

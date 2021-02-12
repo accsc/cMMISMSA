@@ -26,6 +26,8 @@ int get_atoms_for_residue(MOL2 *mols, int res_num)
             ++counter;
     }
 
+    return counter;
+
 }
 
 
@@ -44,7 +46,10 @@ void process_rings_residue(MOL2 **myparent, int res_num)
     }
 
     natoms_res = get_atoms_for_residue(parent, res_num);
+    if(natoms_res == 0)
+    return;
     init_molecule (&res_mol, natoms_res, 1);
+    j = 0;
     for( i = 0; i< parent->n_atoms; i++)
     {
         if (parent->res_num[i] == res_num)
@@ -71,6 +76,7 @@ void process_rings_residue(MOL2 **myparent, int res_num)
         {
             parent->aromatic[i] = aro[j];
             parent->ringer[i] = ringer[j];
+            ++j;
         }
   }
   *myparent = parent;
