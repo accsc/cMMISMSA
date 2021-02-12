@@ -1235,16 +1235,16 @@ int mol_percieve(MOL2 **mymol, int import)
 							if ( vecinos2[k] == 1)
 								ewg += get_bonds(mols[0], vecinos[k] + 1, 2);
 						if ( ewg > 0) {
-							mols->gaff_types[i] = SX;
+							mols->gaff_types[i] = SY;
 							if ( verboseflag == 1)
 								printf("%i tipo SY.\n", i);
 						}else{
-							mols->gaff_types[i] = S4;
+							mols->gaff_types[i] = S6;
 							if ( verboseflag == 1)
 								printf("%i tipo S6.\n", i);
 						}
 					}else{
-						mols->gaff_types[i] = S4;
+						mols->gaff_types[i] = S6;
 						if ( verboseflag == 1)
 							printf("%i tipo S6.\n", i);
 					}
