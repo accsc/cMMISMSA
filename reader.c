@@ -54,6 +54,7 @@
 #include "assign_torsionals.c"
 #include "assign_pairs.c"
 #include "gaff_atom_types.c"
+#include "residues.c"
 
 #define MAX_BUFFER 1024
 
@@ -507,11 +508,10 @@ mol_percieve (MOL2 ** mymol)
 {
 
   MOL2 *mols = NULL;
-  int *ringer = NULL, *aro = NULL;
+  int *ringer = NULL, *aro = NULL, rnum = 0;
   int angleflag = 0, torflag = 0, vdwflag = 0;
 
   mols = *mymol;
-
 
   assign_bond_types (&mols);
 
@@ -520,6 +520,10 @@ mol_percieve (MOL2 ** mymol)
 
   if (mols->n_atoms <= 300)
     get_number_of_rings2 (mols[0], &ringer, &aro);
+  else{
+      for( rnum = 0; rnum < 500; rnum++)
+         process_rings_residue(&mols, rnum);
+  }
 
   GAFF_atom_typing (&mols);
 
@@ -615,6 +619,8 @@ init_molecule (MOL2 ** mymol, int natoms, int conformers)
   *mymol = mols;
 
 }
+
+
 
 
 /**

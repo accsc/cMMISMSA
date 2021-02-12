@@ -3,7 +3,7 @@
  *      @file rings.c
  *      @brief Function to detect rings in a molecule and aromaticity
  *
- *      @author Alvaro Cortes Cabrera <acortes@cbm.uam.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @date 01/10/2010
  *
  * 	This program is free software; you can redistribute it and/or modify
@@ -25,11 +25,10 @@
 #define MAX_RING_MEMBERS 800    /* Puff! but simple linked lists = hell! */
 #define MAX_RINGS 30            /* Little hack to prevent infinite recursive problem */
 
-
 /**
  *
  *	@brief Breadth-first search routine for finding rings in a graph
- *	@author Alvaro Cortes Cabrera <acortes@cbm.uam.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mol MOL2 structure with the molecule
  *	@param path Current walking path
  *	@param n_atom Current atom to explore
@@ -152,7 +151,7 @@ int find_rings2(MOL2 mol, int *path, int n_atom, int last_n_atom, int num_rings,
 /**
  *
  *      @brief Entry point of the Breadth-first search routine for finding rings in a graph
- *      @author Alvaro Cortes Cabrera <acortes@cbm.uam.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @param mol MOL2 structure with the molecule
  *      @param myringer Ring flag for atoms
  *      @param myaromatic Aromatic flag for atoms
