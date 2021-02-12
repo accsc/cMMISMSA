@@ -1490,6 +1490,158 @@ int mol_percieve(MOL2 **mymol, int import)
 			printf("%i - %i.\n", j, mols->gaff_types[j]);
 
 #endif
+/* Fixes */
+
+
+for (i = 0; i < mols->n_atoms; ++i)
+  {
+    flag = 0;
+    flag2 = 0;
+    for (j = 0; j < mols->n_atoms; ++j)
+      {
+        vecinos[j] = 0;
+        vecinos2[j] = 0;
+      }
+    k = 0;
+    for (j = 0; j < mols->n_bonds; ++j)
+      {
+        if (mols->bond_a1[j] == (i + 1))
+          {
+            vecinos[k] = mols->bond_a2[j] - 1;
+            vecinos2[k] = mols->bonds[j];
+            k++;
+          }
+        else if (mols->bond_a2[j] == (i + 1))
+          {
+            vecinos[k] = mols->bond_a1[j] - 1;
+            vecinos2[k] = mols->bonds[j];
+            k++;
+          }
+      }
+
+    flag3 = 0;
+    flag2 = 0;
+    flag = 0;
+
+    if (mols->gaff_types[i] == C || mols->gaff_types[i] == C2)
+      {
+        for (j = 0; j < k; j++)
+          {
+            if (mols->gaff_types[vecinos[j]] == O)
+              flag++;
+            if (mols->gaff_types[vecinos[j]] == S)
+              flag3++;
+
+            if (mols->atoms[vecinos[j]] == 2 && mols->ringer[vecinos[j]] <= 0)
+              flag2++;
+          }
+
+        if (mols->gaff_types[i] == C
+            && (flag >= 2 || (mols->ringer[i] > 0 && flag2 == 0)))
+          mols->gaff_types[i] = C2;
+        if (mols->gaff_types[i] == C2 && flag3 > 0)
+          mols->gaff_types[i] = C;
+
+      }
+    flag = flag2 = flag3 = 0;
+
+    if (mols->gaff_types[i] == N3 || mols->gaff_types[i] == S2
+        || mols->gaff_types[i] == N || mols->gaff_types[i] == CC)
+      {
+        for (j = 0; j < k; j++)
+          {
+            if (mols->gaff_types[vecinos[j]] == CA)
+              flag++;
+
+            if (mols->gaff_types[vecinos[j]] == C2
+                || mols->gaff_types[vecinos[j]] == C
+                || mols->gaff_types[vecinos[j]] == N2
+                || mols->gaff_types[vecinos[j]] == S2
+                || mols->gaff_types[vecinos[j]] == SS)
+              flag2++;
+            if (mols->aromatic[vecinos[j]] > 0)
+              flag3++;
+
+          }
+
+        if (mols->gaff_types[i] == N3 && flag == 1 && flag2 == 1)
+          mols->gaff_types[i] = NA;
+        if (mols->gaff_types[i] == N3 && flag2 >= 2)
+          mols->gaff_types[i] = NA;
+        if (mols->gaff_types[i] == S2 && (flag2 == 2 || flag == 2))
+          mols->gaff_types[i] = SS;
+        if (mols->gaff_types[i] == S2 && flag2 == 1 && flag == 1)
+          mols->gaff_types[i] = SS;
+        if (mols->gaff_types[i] == CC && flag2 + flag >= 2)
+          mols->gaff_types[i] = C2;
+        /*if (mols->gaff_types[i] == N && flag3 == 0)
+ *            mols->gaff_types[i] = NH; */
+      }
+
+  }
+
+for (i = 0; i < mols->n_atoms; ++i)
+  {
+
+    if (mols->atoms[i] != 4)
+      continue;
+
+    flag = 0;
+    flag2 = 0;
+    for (j = 0; j < mols->n_atoms; ++j)
+      {
+        vecinos[j] = 0;
+        vecinos2[j] = 0;
+      }
+
+    k = 0;
+    for (j = 0; j < mols->n_bonds; ++j)
+      {
+        if (mols->bond_a1[j] == (i + 1))
+          {
+            vecinos[k] = mols->bond_a2[j] - 1;
+            vecinos2[k] = mols->bonds[j];
+            k++;
+          }
+        else if (mols->bond_a2[j] == (i + 1))
+          {
+            vecinos[k] = mols->bond_a1[j] - 1;
+            vecinos2[k] = mols->bonds[j];
+            k++;
+          }
+      }
+    flag = vecinos[0];
+
+    k = 0;
+    for (j = 0; j < mols->n_bonds; ++j)
+      {
+        if (mols->bond_a1[j] == (flag + 1))
+          {
+            vecinos[k] = mols->bond_a2[j] - 1;
+            vecinos2[k] = mols->bonds[j];
+            k++;
+          }
+        else if (mols->bond_a2[j] == (flag + 1))
+          {
+            vecinos[k] = mols->bond_a1[j] - 1;
+            vecinos2[k] = mols->bonds[j];
+            k++;
+          }
+      }
+
+    for (j = 0; j < k; j++)
+      {
+        if (mols->gaff_types[vecinos[j]] == N4)
+          flag2++;
+      }
+
+    if (k == 4 && flag2 > 0 && mols->atoms[flag] == 1)
+      mols->gaff_types[i] = HX;
+
+
+  }
+
+
 
 
 
