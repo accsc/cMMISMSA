@@ -513,24 +513,24 @@ mol_percieve (MOL2 ** mymol)
   mols = *mymol;
 
 
-      assign_bond_types(&mols);
+  assign_bond_types (&mols);
 
-      ringer = mols->ringer;
-      aro = mols->aromatic;
+  ringer = mols->ringer;
+  aro = mols->aromatic;
 
-      if (mols->n_atoms <= 300)
-	get_number_of_rings2 (mols[0], &ringer, &aro);
+  if (mols->n_atoms <= 300)
+    get_number_of_rings2 (mols[0], &ringer, &aro);
 
-      GAFF_atom_typing(&mols);
+  GAFF_atom_typing (&mols);
 
-      if( angleflag )
-          assign_angles(&mols);
+  if (angleflag)
+    assign_angles (&mols);
 
-      if ( torflag )
-         assign_torsionals(&mols);
+  if (torflag)
+    assign_torsionals (&mols);
 
-      if ( vdwflag )
-         assign_pairs(&mols);
+  if (vdwflag)
+    assign_pairs (&mols);
 
   *mymol = mols;
 
@@ -547,7 +547,8 @@ mol_percieve (MOL2 ** mymol)
  *	@return NULL
  *
  */
-void init_molecule(MOL2 **mymol, int natoms, int conformers)
+void
+init_molecule (MOL2 ** mymol, int natoms, int conformers)
 {
   MOL2 *mols = NULL;
   int i = 0;
@@ -693,14 +694,14 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
       exit (-2);
     }
 
-  init_molecule(&mols, molecules, conformers);
+  init_molecule (&mols, molecules, conformers);
   *mymol = mols;
 
 
   if (gradflag == 1)
     {
       if (verboseflag == 1)
-         printf ("Cleaning up the gradients.\n");
+	printf ("Cleaning up the gradients.\n");
 
       for (j = 0; j < mols->n_atoms; ++j)
 	{

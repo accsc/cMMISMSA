@@ -84,5 +84,3 @@ update_default_conformer (MOL2 ** mymol)
 
   return 0;
 }
-
-
