@@ -522,7 +522,7 @@ mol_percieve (MOL2 ** mymol)
     get_number_of_rings2 (mols[0], &ringer, &aro);
   else{
       
-      for( rnum = 0; rnum < 1000; rnum++)
+      for( rnum = 0; rnum < get_number_of_residues(mols); rnum++)
          process_rings_residue(&mols, rnum);
   }
 
@@ -580,6 +580,7 @@ init_molecule (MOL2 ** mymol, int natoms, int conformers)
   mols->n_fragments = 0;
 
   mols->res_num = (int *) calloc (sizeof (int *), mols->n_atoms + 10);
+  mols->internal_res_num = (int *) calloc (sizeof (int *), mols->n_atoms + 10);
   mols->res_names = (char **) calloc (sizeof (char **), mols->n_atoms + 1);
   mols->atom_names = (char **) calloc (sizeof (char **), mols->n_atoms + 1);
   for (i = 0; i < mols->n_atoms; i++)
@@ -644,7 +645,7 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
   MOL2 *mols = NULL;
   char *line = NULL;
   char tmp_atom[MAX_BUFFER], tmp_radius[6], tmp_charge[10];
-  char res_num[10], res_type[10];
+  char res_num[10], res_type[10], prev_res_num = -999, internal_res_num = -1;
   char myx[12], myy[12], myz[12];
 
   int molecules = 0, i = 0, j = 0, wats = 0;
@@ -812,7 +813,13 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 
 	      strncpy (res_num, &line[23], 6);
 	      mols->res_num[current_atom] = atoi (res_num);
-
+          if (atoi(res_num) != prev_res_num)
+          {
+              internal_res_num++;
+              prev_res_num = atoi(res_num);
+          }
+          mols->internal_res_num[current_atom] = internal_res_num;
+    
 	      strncpy (res_type, &line[17], 3);
 	      res_type[3] = '\0';
 	      mols->res_type[current_atom] =

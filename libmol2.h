@@ -205,6 +205,7 @@ int *protein;
 
 /** Reside number */
 int *res_num;
+int *internal_res_num;
 /** Residue type */
 int *res_type;
 /** Residue names */

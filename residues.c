@@ -16,13 +16,25 @@
  */
 
 
+int get_number_of_residues(MOL2 *mols)
+{
+    int i = 0, max_res = 0;
+    for( i = 0; i < mols->n_atoms; i++)
+    {
+        if( mols->internal_res_num[i] > max_res)
+            max_res = mols->internal_res_num[i];
+    }
+
+    return max_res+1;
+}
+
 int get_atoms_for_residue(MOL2 *mols, int res_num)
 {
     int i = 0, counter = 0;
 
     for( i = 0; i < mols->n_atoms; i++)
     {
-        if (mols->res_num[i] == res_num)
+        if (mols->internal_res_num[i] == res_num)
             ++counter;
     }
 
@@ -52,7 +64,7 @@ void process_rings_residue(MOL2 **myparent, int res_num)
     j = 0;
     for( i = 0; i< parent->n_atoms; i++)
     {
-        if (parent->res_num[i] == res_num)
+        if (parent->internal_res_num[i] == res_num)
         {
             res_mol->atoms[j] = parent->atoms[i];
             res_mol->x[j] = parent->x[i];
@@ -72,7 +84,7 @@ void process_rings_residue(MOL2 **myparent, int res_num)
 
   for( i = 0; i < parent->n_atoms; i++)
   {
-        if (parent->res_num[i] == res_num)
+        if (parent->internal_res_num[i] == res_num)
         {
             parent->aromatic[i] = aro[j];
             parent->ringer[i] = ringer[j];
@@ -80,6 +92,7 @@ void process_rings_residue(MOL2 **myparent, int res_num)
         }
   }
   *myparent = parent;
+  cleanup(&res_mol);
 
 }
 
