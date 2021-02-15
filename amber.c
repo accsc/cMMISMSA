@@ -453,6 +453,7 @@ int TOP_reader(MOL2 **mymol, char *finput_name, TOP **mytop, int verbose)
         mol->n_fragments = 0;
 
         mol->res_num = (int*)calloc(sizeof(int), mol->n_atoms + 1);
+        mol->internal_res_num = (int*)calloc(sizeof(int), mol->n_atoms + 1);
         mol->res_names = (char**)calloc(sizeof(char*), mol->n_atoms + 1);
         mol->atom_names = (char**)calloc(sizeof(char*), mol->n_atoms + 1);
         mol->res_type = (int*)calloc(sizeof(int), mol->n_atoms + 1);
@@ -487,6 +488,7 @@ int TOP_reader(MOL2 **mymol, char *finput_name, TOP **mytop, int verbose)
                         for( j = res_pointers[i]-1; j < res_pointers[i+1]-1; j++)
                         {
                               mol->res_num[j] = k;
+                              mol->internal_res_num[j] = k;
                               if( resname_flag )
                               {
                                 strncpy(mol->res_names[j],res_labels[i],3);
@@ -769,12 +771,12 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
                         if( last_atom == -1)
                         {
                                 last_atom = j;
-                                current_res = mol->res_num[j];
+                                current_res = mol->internal_res_num[j];
                         }else{
-                                if( current_res != mol->res_num[j] )
+                                if( current_res != mol->internal_res_num[j] )
                                 {
                                    ++res_index;
-                                   current_res = mol->res_num[j];
+                                   current_res = mol->internal_res_num[j];
                                 }
                         }
                                 dx = (mol->x[i] - mol->x[j]);
@@ -859,13 +861,13 @@ float get_amber_vdw_selected( MOL2 *mol, TOP *topo, float ***byres, float *vdw_r
 			if( last_atom == -1)
 			{
 				last_atom = j;
-				current_res = mol->res_num[j];
+				current_res = mol->internal_res_num[j];
 			}else{
-				if( current_res != mol->res_num[j] )
+				if( current_res != mol->internal_res_num[j] )
 				{
 /*				   ++res_index;*/
-				   res_index = mol->res_num[j]-1;
-				   current_res = mol->res_num[j];
+				   res_index = mol->internal_res_num[j]-1;
+				   current_res = mol->internal_res_num[j];
 				}
 			}
                                 dx = (mol->x[i] - mol->x[j]);
@@ -1249,6 +1251,7 @@ int split_amber_mol(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
         lig->ism_selection = (int *)calloc(sizeof(int), lig->n_atoms + 1);
         lig->vdw_selection = (int *)calloc(sizeof(int), lig->n_atoms + 1);
         lig->res_num = (int *)calloc(sizeof(int), lig->n_atoms + 1);
+        lig->internal_res_num = (int *)calloc(sizeof(int), lig->n_atoms + 1);
 
 
         prot->n_atoms = prot_atoms;
@@ -1274,6 +1277,7 @@ int split_amber_mol(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
         prot->ism_selection = (int *)calloc(sizeof(int), prot->n_atoms + 1);
         prot->vdw_selection = (int *)calloc(sizeof(int), prot->n_atoms + 1);
         prot->res_num = (int *)calloc(sizeof(int), prot->n_atoms + 1);
+        prot->internal_res_num = (int *)calloc(sizeof(int), prot->n_atoms + 1);
 
 
 	/* Initial coordinates */
@@ -1288,18 +1292,20 @@ int split_amber_mol(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
 			lig->z[j] = mol->z[i];
 			lig->atoms[j] = mol->atoms[i];
 			lig->pcharges[j] = mol->pcharges[i];
-                        lig->res_num[j] = mol->res_num[i];
-                        lig->vdw_selection[k] = mol->vdw_selection[i];
+            lig->res_num[j] = mol->res_num[i];
+            lig->internal_res_num[j] = mol->internal_res_num[i];
+            lig->vdw_selection[k] = mol->vdw_selection[i];
 
 			++j;
 		}else{
-                        prot->x[k] = mol->x[i];
-                        prot->y[k] = mol->y[i];
-                        prot->z[k] = mol->z[i];
-                        prot->vdw_selection[k] = mol->vdw_selection[i];
+            prot->x[k] = mol->x[i];
+            prot->y[k] = mol->y[i];
+            prot->z[k] = mol->z[i];
+            prot->vdw_selection[k] = mol->vdw_selection[i];
 			prot->atoms[k] = mol->atoms[i];
 			prot->pcharges[k] = mol->pcharges[i];
 			prot->res_num[k] = mol->res_num[i];
+			prot->internal_res_num[k] = mol->internal_res_num[i];
 			++k;
 		}
 	}
@@ -1393,6 +1399,7 @@ void clean_amber_split_mol(MOL2 **mymol)
         free(lig->ism_selection );
         free(lig->vdw_selection );
         free(lig->res_num );
+        free(lig->internal_res_num );
 
         free(lig->bonds);
         free(lig->bond_a1 );
@@ -1429,6 +1436,7 @@ void clean_amber_mol(MOL2 **mymol)
         free(mol->n_fragments );
 
         free(mol->res_num );
+        free(mol->internal_res_num );
         free(mol->res_type );
 
         for( i = 0; i < mol->n_atoms; i++)
@@ -1517,6 +1525,7 @@ int update_split_coordinates(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
 			lig->atoms[j] = mol->atoms[i];
 			lig->pcharges[j] = mol->pcharges[i];
                         lig->res_num[j] = mol->res_num[i];
+                        lig->internal_res_num[j] = mol->internal_res_num[i];
                         lig->vdw_selection[k] = mol->vdw_selection[i];
 
 			++j;
@@ -1528,6 +1537,7 @@ int update_split_coordinates(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
 			prot->atoms[k] = mol->atoms[i];
 			prot->pcharges[k] = mol->pcharges[i];
 			prot->res_num[k] = mol->res_num[i];
+			prot->internal_res_num[k] = mol->internal_res_num[i];
 			++k;
 		}
 	}

@@ -69,6 +69,7 @@ int cleanup(MOL2 **mymols)
 	free(mols->vdw_type);
 	free(mols->vdwpairs_a);
 	free(mols->vdwpairs_b);
+	free(mols->internal_res_num);
 	free(mols->res_num);
 	free(mols->res_type);
         for( j = 0; j < mols->n_atoms; j++)
