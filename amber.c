@@ -743,7 +743,7 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
         float vdwE = 0.0f, qqE = 0.0f, tmpE = 0.0f, dScreening = 0.0f;
         float cte = 0.0f, lambda = 0.0f, epsilon = 0.0f, sigma6 = 0.0f;
         float alpha = 1.0367f;
-        int first = 0.0f, second = 0.0f;
+        int first = 0, second = 0;
 
         float **res_energies = NULL;
         int current_res = 0;
@@ -768,17 +768,7 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
                         if( mol->vdw_selection[j] != 1 || mol->backbone[j] != 0 || mol->exclude[j] == 1)
                                 continue;
 
-                        if( last_atom == -1)
-                        {
-                                last_atom = j;
-                                current_res = mol->internal_res_num[j];
-                        }else{
-                                if( current_res != mol->internal_res_num[j] )
-                                {
-                                   ++res_index;
-                                   current_res = mol->internal_res_num[j];
-                                }
-                        }
+                        res_index = mol->internal_res_num[j];
                                 dx = (mol->x[i] - mol->x[j]);
                                 dy = (mol->y[i] - mol->y[j]);
                                 dz = (mol->z[i] - mol->z[j]);

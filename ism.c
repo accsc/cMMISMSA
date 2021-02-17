@@ -3,7 +3,7 @@
  *      @file ism.c
  *      @brief Implicit solvation model routines
  *
- *      @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @date 09/08/2012
  *
  *      This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ int ism_get_distance_matrix(MOL2 *mymol, float ***mymatrix);
 
 /**
  *	@brief Calculate the apolar contribution for a complex using the Implicit Solvation Model
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param lig Ligand MOL2 structure
  *	@param prot Protein MOL2 structure
  *	@param atomSASA Atomic Accesible Surfaces for the free ligand
@@ -72,7 +72,7 @@ float ism_get_apolar_energy(MOL2 *lig, MOL2 *prot, float *atomSASA, float *atomS
 
 /**
  *	@brief Get polar contribution of desolvation for protein
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mymol Protein MOL2 structure
  *	@param lig Ligand MOL2 structure
  *	@param atomSASA Atomic accesible surfaces for the free protein
@@ -146,7 +146,7 @@ float ism_get_desolvation_energy_prot(MOL2 *mymol, MOL2 *lig, float *atomSASA, f
 
 /**
  *     @brief Get polar contribution of desolvation for ligand
- *     @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *     @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *     @param mymol Ligand MOL2 structure
  *     @param lig Ligand MOL2 structure
  *     @param atomSASA Atomic accesible surfaces for the free ligand
@@ -228,7 +228,7 @@ float ism_get_desolvation_energy(MOL2 *mymol, MOL2 *lig, float *atomSASA, float 
 
 /**
  *	@brief Calculate SASA for the protein in complex
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mymol Protein MOL2 structure
  *	@param total_surface Total surface without overlaps
  *	@param buried Buried atoms flag in the free protein
@@ -389,7 +389,7 @@ int ism_get_complex_sasa_prot(MOL2 *mymol, float *total_surface, int *buried, in
 
 /**
  *      @brief Calculate SASA for the ligand in complex
- *      @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @param mymol Protein MOL2 structure
  *      @param total_surface Total surface without overlaps
  *      @param buried Buried atoms flag in the free ligand
@@ -552,7 +552,7 @@ int ism_get_complex_sasa(MOL2 *mymol, float *total_surface, int *buried, int *bu
 
 /**
  *	@brief Calculate SASA for the free ligand
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mymol Molecule MOL2 structure
  *	@param total_surface Total surface without overlaps
  *	@param buried Buried atom flag
@@ -656,7 +656,7 @@ int ism_get_free_sasa(MOL2 *mymol, float *total_surface, int *buried,
 
 /**
  *      @brief Calculate SASA for the free protein
- *      @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @param mymol Molecule MOL2 structure
  *      @param total_surface Total surface without overlaps
  *      @param buried Buried atom flag
@@ -760,7 +760,7 @@ int ism_get_free_sasa_prot(MOL2 *mymol, float *total_surface, int *buried,
 
 /**
  *	@brief Calculate protein-protein overlaps 
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mymol Protein MOL2 structure
  *	@param mynumOverlaps Vector of number of atomic overlaps
  *	@param myburied Atom buried flag
@@ -870,7 +870,7 @@ int ism_getInternalOverlaps_prot(MOL2 *mymol, int **mynumOverlaps, int **myburie
 
 /**
  *      @brief Calculate ligand-ligand overlaps 
- *      @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @param mymol Protein MOL2 structure
  *      @param mynumOverlaps Vector of number of atomic overlaps
  *      @param myburied Atom buried flag
@@ -969,7 +969,7 @@ int ism_getInternalOverlaps(MOL2 *mymol, float **distance, int **mynumOverlaps, 
 
 /**
  *	@brief Calculate ligand-protein overlaps
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param lig Ligand MOL2 structure
  *	@param prot Protein MOL2 structure
  *	@param myburied_lig_complex Atom buried flag for ligand
@@ -1098,7 +1098,7 @@ int ism_getExternalOverlaps(MOL2 *lig, MOL2 *prot, int **myburied_lig_complex, i
 
 /**
  *	@brief Select only atoms in the grid for Implicit solvent calculation
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mymol Pointer to protein MOL2 structure
  *	@param max_grid Max grid coordinates
  *	@param min_grid Min grid coordinates
@@ -1444,7 +1444,7 @@ int ism_select_atoms_by_ligand(MOL2 **mymol, MOL2 *lig)
 
 /**
  *	@brief Calculate ligand-protein overlaps
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param lig Ligand MOL2 structure
  *	@param prot Protein MOL2 structure
  *	@param myburied_lig_complex Atom buried flag for ligand
@@ -1587,7 +1587,7 @@ int ism_getExternalOverlaps_forHbonds(MOL2 *lig, MOL2 *prot, int **myburied_lig_
 
 /**
  *      @brief Calculate SASA for the ligand in complex only hbonds
- *      @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *      @param mymol Protein MOL2 structure
  *      @param total_surface Total surface without overlaps
  *      @param buried Buried atoms flag in the free ligand
@@ -1753,7 +1753,7 @@ int ism_get_complex_sasa_hbond(MOL2 *mymol, float *total_surface, int *buried, i
 
 /**
  *	@brief Calculate SASA for the protein in complex
- *	@author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
+ *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
  *	@param mymol Protein MOL2 structure
  *	@param total_surface Total surface without overlaps
  *	@param buried Buried atoms flag in the free protein

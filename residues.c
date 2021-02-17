@@ -18,7 +18,7 @@
 
 int get_number_of_residues(MOL2 *mols)
 {
-    int i = 0, max_res = 0;
+    int i = 0, max_res = -1;
     for( i = 0; i < mols->n_atoms; i++)
     {
         if( mols->internal_res_num[i] > max_res)

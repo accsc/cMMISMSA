@@ -521,7 +521,6 @@ mol_percieve (MOL2 ** mymol)
   if (mols->n_atoms <= 300)
     get_number_of_rings2 (mols[0], &ringer, &aro);
   else{
-      
       for( rnum = 0; rnum < get_number_of_residues(mols); rnum++)
          process_rings_residue(&mols, rnum);
   }
@@ -645,10 +644,10 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
   MOL2 *mols = NULL;
   char *line = NULL;
   char tmp_atom[MAX_BUFFER], tmp_radius[6], tmp_charge[10];
-  char res_num[10], res_type[10], prev_res_num = -999, internal_res_num = -1;
+  char res_num[10], res_type[10];
   char myx[12], myy[12], myz[12];
 
-  int molecules = 0, i = 0, j = 0, wats = 0;
+  int molecules = 0, i = 0, j = 0, wats = 0, prev_res_num = -999, internal_res_num = -1;
   int current_atom = 0, current_conformer = 0, no_count = 0, conformers = 0;
   float pcharge = 0.0;
 
@@ -678,19 +677,19 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 	++molecules;
 
       if ((line[0] == 'E' && line[1] == 'N' && line[2] == 'D'
-	   && line[3] != 'M'))
+	   && line[3] == 'M'))
 	{
 	  conformers++;
 	  no_count = 1;
 	}
 
-      if ((line[0] == 'T' && line[1] == 'E' && line[2] == 'R')
+    /*  if ((line[0] == 'T' && line[1] == 'E' && line[2] == 'R')
 	  || (line[0] == 'E' && line[1] == 'N' && line[2] == 'D'
 	      && line[3] != 'M'))
 	{
 	  conformers++;
 	  no_count = 1;
-	}
+	}*/
     }
 
   rewind (input);
@@ -729,9 +728,8 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
       fflush (stderr);
 #endif
 
-      if ((line[0] == 'T' && line[1] == 'E' && line[2] == 'R')
-	  || (line[0] == 'E' && line[1] == 'N' && line[2] == 'D'
-	      && line[3] != 'M'))
+	  if (line[0] == 'E' && line[1] == 'N' && line[2] == 'D'
+	      && line[3] == 'M')
 	{
 
 /*		if ( (line[0] == 'E' && line[1] == 'N' && line[2] == 'D' && line[3] != 'M') ) {*/
@@ -818,6 +816,7 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
               internal_res_num++;
               prev_res_num = atoi(res_num);
           }
+          /*fprintf(stderr,"Internal residue number %i\n, Real res number: %i\n", internal_res_num,atoi(res_num));*/
           mols->internal_res_num[current_atom] = internal_res_num;
     
 	      strncpy (res_type, &line[17], 3);

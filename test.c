@@ -480,7 +480,7 @@ main (argc, argv)
 		  if (mol->atom_names[i][0] == 'C'
 		      && mol->atom_names[i][1] == 'A'
 		      && mol->atom_names[i][2] == ' '
-		      && mol->res_num[i] < 2000)
+		      && mol->internal_res_num[i] < 2000)
 		    {
 		      entropy_selection[i] = 1;
 		      entropy_natoms++;
@@ -534,13 +534,13 @@ main (argc, argv)
 
   /* Calculate last residue from protein */
   nres = 1;
-  last_res = prot->res_num[0];
+  last_res = prot->internal_res_num[0];
   for (i = 0; i < prot->n_atoms; i++)
     {
-      if (prot->res_num[i] != last_res)
+      if (prot->internal_res_num[i] != last_res)
 	++nres;
 
-      last_res = prot->res_num[i];
+      last_res = prot->internal_res_num[i];
     }
   fprintf (stderr, "Residues in protein/last in protein: %i/%i\n", nres,
 	   last_res);
@@ -1177,18 +1177,18 @@ main (argc, argv)
 	{
 	  if (last_res == -1)
 	    {
-	      last_res = mol->res_num[i];
+	      last_res = mol->internal_res_num[i];
 	      res_idx = 0;
 	      mol->pcharges[i] = res_averages[res_idx][0];
 	    }
 	  else
 	    {
-	      if (last_res != mol->res_num[i])
+	      if (last_res != mol->internal_res_num[i])
 		{
 		  ++res_idx;
 		}
 	      mol->pcharges[i] = res_averages[res_idx][0];
-	      last_res = mol->res_num[i];
+	      last_res = mol->internal_res_num[i];
 	    }
 
 	}
@@ -1196,26 +1196,28 @@ main (argc, argv)
 	{
 	  if (last_res == -1)
 	    {
-	      last_res = mol->res_num[i];
+	      last_res = mol->internal_res_num[i];
 /*			res_idx = 0;*/
-	      res_idx = mol->res_num[i] - 1;
+	      res_idx = mol->internal_res_num[i] - 1;
 	      mol->pcharges[i] = res_averages[res_idx][0];
 	    }
 	  else
 	    {
-	      if (last_res != mol->res_num[i])
+	      if (last_res != mol->internal_res_num[i])
 		{
 /*			 ++res_idx;*/
-		  res_idx = mol->res_num[i] - 1;
+		  res_idx = mol->internal_res_num[i] - 1;
 		}
 	      mol->pcharges[i] = res_averages[res_idx][0];
-	      last_res = mol->res_num[i];
+	      last_res = mol->internal_res_num[i];
 	    }
 
 	}
     }
 
   dump_pdb_conservative_file (mol, f_pdb_byres);
+  /*for( j = 0; j < mol->n_atoms; j++)
+  printf("%i %s %s %i %i %i %s\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], let[ mol->gaff_types[j] -1 ]);*/
 
   if (mdcrd_mode == 1 || pdb_mode == 2)
     {
