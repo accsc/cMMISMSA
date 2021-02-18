@@ -883,6 +883,7 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 
   mol_percieve (&mols);
 
+  AMBER_atom_typing(&mols);
 
   return 0;
 }

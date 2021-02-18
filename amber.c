@@ -1536,3 +1536,55 @@ int update_split_coordinates(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
 
 	return 0;
 }
+
+char *ltrim(char *s)
+{
+
+    while(isspace(*s)) s++;
+    return s;
+}
+
+char *rtrim(char *s)
+{
+
+    char* back = s + strlen(s);
+    while(isspace(*--back));
+    *(back+1) = '\0';
+    return s;
+}
+
+
+char *trim(char *s)
+{
+    return rtrim(ltrim(s)); 
+}
+
+
+void AMBER_atom_typing (MOL2 ** mymol)
+{
+    int i = 0, j = 0;
+    MOL2 *mols = NULL;
+    char *atom_name = NULL, *res_name = NULL;
+
+    mols = *mymol;
+
+    for(i = 0; i < mols->n_atoms; i++)
+    {
+        atom_name = mols->atom_names[i];
+        res_name = mols->res_names[i];
+
+        for(j = 0; j < 2257; j++)
+        {
+           if ( (strcmp(res_name, amber_res_names[j]) == 0) && (strcmp(trim(atom_name), amber_atom_names[j]) == 0))
+           {
+                mols->vdw_parm1[i] = amber_vdw_epsilon[j];
+                mols->vdw_parm2[i] = amber_vdw_r0[j];
+                mols->pcharges[i] = amber_pcharges[j];
+           }
+        }
+    }
+
+    *mymol = mols;
+}
+
+
