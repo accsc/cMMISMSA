@@ -2027,7 +2027,7 @@ float get_chemscore_grid_energy_scaled(MOL2 *mol, MOL2 *prot,int *types, int fla
                                                         dz = z - prot->z[i];
 							dist = (dx*dx)+(dy*dy)+(dz*dz);
 							dist = sqrt(dist);
-							e1 = vdw_r[ mol->gaff_types[l]-1] + vdw_r[ prot->gaff_types[i]-1] + 0.5f;
+							e1 = mol->vdw_parm2[l] + prot->vdw_parm2[i] + 0.5f;
 							if (flag == 1)
 							energy += (eval_block(dist,e1,e1+3.0f)*-0.117f);
 							lp +=  (eval_block(dist,e1,e1+3.0f)*-0.117f);

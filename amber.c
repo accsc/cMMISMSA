@@ -739,9 +739,9 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
         int i = 0, j = 0, index = 0;
         float dx = 0.0, dy = 0.0f, dz = 0.0f;
         float dist = 0.0f, dist2 = 0.0f, distr = 0.0f;
-        float r12 = 0.0f, r6 =0.0f;
+        float r12 = 0.0f, r6 =0.0f, acoeff = 0.0, bcoeff = 0.0;
         float vdwE = 0.0f, qqE = 0.0f, tmpE = 0.0f, dScreening = 0.0f;
-        float cte = 0.0f, lambda = 0.0f, epsilon = 0.0f, sigma6 = 0.0f;
+        float cte = 0.0f, lambda = 0.0f, epsilon = 0.0f, req = 0.0f;
         float alpha = 1.0367f;
         int first = 0, second = 0;
 
@@ -785,21 +785,16 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
 
                                 res_energies[res_index][0] += tmpE;
 
+                                epsilon = sqrt(mol->vdw_parm1[i] * mol->vdw_parm1[j]);
+                                req = mol->vdw_parm2[i] + mol->vdw_parm2[j];
+                                req = req * req * req * req * req * req; /* r0 ^6 */
+                                acoeff = epsilon * (req*req);
+                                bcoeff = 2.0*epsilon*req;
 
-/*                                first = topo->atom_type_index[i];
-                                second = topo->atom_type_index[j];
-
-                                index = topo->nb_index[(topo->ntypes * (first-1) + second)-1]-1;*/
-
-                                epsilon = prevdw[ mol->gaff_types[i] - 1][mol->gaff_types[j] - 1 ][1];
-                                sigma6 = prevdw[ mol->gaff_types[i] - 1][mol->gaff_types[j] - 1 ][2];
-
-                                r6 = sigma6 / (dist2 * dist2 * dist2);
+                                r6 = (dist2 * dist2 * dist2);
                                 r12 = r6 * r6;
 
-/*                                epsilon *= 0.5f;*/
-
-                                tmpE = epsilon * (r12 - 2.0 * r6);
+                                tmpE = (acoeff / r12) - (bcoeff/r6);
 
                                 vdwE = vdwE + tmpE;
 
@@ -1237,6 +1232,8 @@ int split_amber_mol(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
         lig->conformers = (CONFORMER*)calloc(sizeof(CONFORMER), 0);
         lig->n_fragments = 0;
         lig->gaff_types = (int*)calloc(sizeof(int), lig->n_atoms + 1);
+        lig->vdw_parm1 = (float*)calloc(sizeof(float), lig->n_atoms + 1);
+        lig->vdw_parm2 = (float*)calloc(sizeof(float), lig->n_atoms + 1);
         lig->ism_types = (int *)calloc(sizeof(int), lig->n_atoms + 1);
         lig->ism_selection = (int *)calloc(sizeof(int), lig->n_atoms + 1);
         lig->vdw_selection = (int *)calloc(sizeof(int), lig->n_atoms + 1);
@@ -1263,6 +1260,8 @@ int split_amber_mol(MOL2 *mol, MOL2 **mylig, MOL2 **myprot)
         prot->conformers = (CONFORMER*)calloc(sizeof(CONFORMER), 0);
         prot->n_fragments = 0;
         prot->gaff_types = (int*)calloc(sizeof(int), prot->n_atoms + 1);
+        prot->vdw_parm1 = (float*)calloc(sizeof(float), prot->n_atoms);
+        prot->vdw_parm2 = (float*)calloc(sizeof(float), prot->n_atoms);
         prot->ism_types = (int *)calloc(sizeof(int), prot->n_atoms + 1);
         prot->ism_selection = (int *)calloc(sizeof(int), prot->n_atoms + 1);
         prot->vdw_selection = (int *)calloc(sizeof(int), prot->n_atoms + 1);

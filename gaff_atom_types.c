@@ -934,11 +934,31 @@ GAFF_atom_typing (MOL2 ** mymols)
       if (k == 4 && flag2 > 0 && mols->atoms[flag] == 1)
 	mols->gaff_types[i] = HX;
 
-
     }
+
 
   free (vecinos);
   free (vecinos2);
 
   *mymols = mols;
+}
+
+
+void assign_gaff_vdw_types(MOL2 **mymol)
+{
+    MOL2 *mols = NULL;
+    int i = 0;
+
+    mols = *mymol;
+
+    for ( i = 0; i < mols->n_atoms; i++)
+    {
+    /* Assign epsilon (well depth) parameter from GAFF */
+    mols->vdw_parm1[i] = gaff_vdw_epsilon[ mols->gaff_types[i] -1 ];
+    /* Assign r0 (equilibrium distance) parameter from GAFF */
+    mols->vdw_parm2[i] = gaff_vdw_r0[ mols->gaff_types[i] -1 ];
+    }
+
+    *mymol = mols;
+
 }

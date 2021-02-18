@@ -526,6 +526,7 @@ mol_percieve (MOL2 ** mymol)
   }
 
   GAFF_atom_typing (&mols);
+  assign_gaff_vdw_types(&mols);
 
   if (angleflag)
     assign_angles (&mols);
@@ -609,6 +610,8 @@ init_molecule (MOL2 ** mymol, int natoms, int conformers)
   mols->default_conformer = 0;
 
   mols->gaff_types = (int *) calloc (sizeof (int), mols->n_atoms + 1);
+  mols->vdw_parm1 = (float *) calloc (sizeof (float), mols->n_atoms + 1);
+  mols->vdw_parm2 = (float *) calloc (sizeof (float), mols->n_atoms + 1);
   mols->ism_types = (int *) calloc (sizeof (int), mols->n_atoms + 1);
   mols->hyde_types = (int *) calloc (sizeof (int), mols->n_atoms + 1);
 

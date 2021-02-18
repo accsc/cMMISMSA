@@ -59,6 +59,8 @@ int cleanup(MOL2 **mymols)
 	free(mols->ja);
 	free(mols->ka);
 	free(mols->gaff_types);
+	free(mols->vdw_parm1);
+	free(mols->vdw_parm2);
         free(mols->ism_types);
         free(mols->hyde_types);
         free(mols->ism_selection);

@@ -155,6 +155,8 @@ int n_pairs;
 
 /** Atom types for GAFF */
 int *gaff_types;
+float *vdw_parm1;
+float *vdw_parm2;
 
 /** vdW selection */
 int *vdw_selection;

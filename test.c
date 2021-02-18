@@ -29,6 +29,7 @@
 /*
  *  Rev 5 - February 2021
  *        - Fixed bugs in PDB atom typing and protein typing based on dictionary
+ *        - Fixed bugs in PDB procesing (multichain systems)
  *
  *	Rev 4 - March 2018
  *        - Added full vdW/qq/solv residue decomposition in output for COMBINE-like methods
@@ -1588,7 +1589,7 @@ show_some_pride ()
 {
   fprintf (stderr, "");
   fprintf (stderr,
-	   "cMMISMSA - rev4 - Another program to quantify ligand-target interactions\n\n");
+	   "cMMISMSA - rev5 - Another program to quantify ligand-target interactions\n\n");
   fprintf (stderr, "Alvaro Cortes Cabrera <alvarocortesc@gmail.com>\n");
   fprintf (stderr, "Have fun!\n\n");
 }
