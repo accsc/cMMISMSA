@@ -54,6 +54,7 @@
 #include "assign_torsionals.c"
 #include "assign_pairs.c"
 #include "gaff_atom_types.c"
+#include "assign_gasteiger.c"
 #include "residues.c"
 
 #define MAX_BUFFER 1024
@@ -646,7 +647,7 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
   FILE *input = NULL;
   MOL2 *mols = NULL;
   char *line = NULL;
-  char tmp_atom[MAX_BUFFER], tmp_radius[6], tmp_charge[10];
+  char tmp_atom[MAX_BUFFER], tmp_radius[6], tmp_charge[10], prev_resname[4];
   char res_num[10], res_type[10];
   char myx[12], myy[12], myz[12];
 
@@ -657,6 +658,11 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
   /* FLAGS */
   int gradflag = 1, verboseflag = 0;
 
+
+  prev_resname[0] = ' ';
+  prev_resname[1] = ' ';
+  prev_resname[2] = ' ';
+  prev_resname[3] = ' ';
   if ((input = fopen (finput_name, "r")) == NULL)
     {
       fprintf (stderr, "Error. Cant open file %s.\n", finput_name);
@@ -814,13 +820,6 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 
 	      strncpy (res_num, &line[23], 6);
 	      mols->res_num[current_atom] = atoi (res_num);
-          if (atoi(res_num) != prev_res_num)
-          {
-              internal_res_num++;
-              prev_res_num = atoi(res_num);
-          }
-          /*fprintf(stderr,"Internal residue number %i\n, Real res number: %i\n", internal_res_num,atoi(res_num));*/
-          mols->internal_res_num[current_atom] = internal_res_num;
     
 	      strncpy (res_type, &line[17], 3);
 	      res_type[3] = '\0';
@@ -833,6 +832,18 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 
 	      strncpy (mols->res_names[current_atom], res_type, 3);
 	      strncpy (mols->atom_names[current_atom], &line[12], 4);
+
+
+          if (atoi(res_num) != prev_res_num || strcmp(prev_resname, res_type) != 0)
+          {
+              internal_res_num++;
+              prev_res_num = atoi(res_num);
+          }
+          strncpy(prev_resname,res_type,4);
+
+          /*fprintf(stderr,"Internal residue number %i\n, Real res number: %i\n", internal_res_num,atoi(res_num));*/
+          mols->internal_res_num[current_atom] = internal_res_num;
+
 
 	      if (mols->atoms[current_atom] >= 100)
 		{

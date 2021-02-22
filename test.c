@@ -530,7 +530,7 @@ main (argc, argv)
 	  load_crd (&mol, rst_file, topo);
 	}
     }
-  /* Split ligand and protein in tow MOLs to use standard routines */
+  /* Split ligand and protein in two MOLs to use standard routines */
   split_amber_mol (mol, &lig, &prot);
 
   /* Calculate last residue from protein */
@@ -1217,8 +1217,8 @@ main (argc, argv)
     }
 
   dump_pdb_conservative_file (mol, f_pdb_byres);
-  /*for( j = 0; j < mol->n_atoms; j++)
-  printf("%i %s %s %i %i %i %s\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], let[ mol->gaff_types[j] -1 ]);*/
+  for( j = 0; j < mol->n_atoms; j++)
+  printf("%i %s %s %i %i %i %s\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], let[ mol->gaff_types[j] -1 ]);
 
   if (mdcrd_mode == 1 || pdb_mode == 2)
     {

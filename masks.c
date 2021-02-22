@@ -62,7 +62,7 @@ void select_on_mask(MOL2 **mymol, char *mask, int verbose)
 		 last = first;
 		for( i = 0; i < mol->n_atoms; i++)
 		{
-			if( mol->internal_res_num[i] >= first && mol->internal_res_num[i] <= last)
+			if( mol->internal_res_num[i]+1 >= first && mol->internal_res_num[i]+1 <= last)
 			{
 				mol->backbone[i] = 1;
 				++total;
