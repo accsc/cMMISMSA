@@ -37,6 +37,11 @@ main (argc, argv)
   MultiPDB_reader (&mol, argv[1], 0);
   mol_percieve(&mol);
   for( i = 0; i < mol->n_atoms; i++)
-	  printf("%s\n", let[mol->gaff_types[i]-1]);
+  {
+	  if( mol->gaff_types[i] > 0)
+	  	printf("%s\n", let[mol->gaff_types[i]-1]);
+	  else
+	  	printf("%i\n", mol->gaff_types[i]-1);
+  }
 
 }
