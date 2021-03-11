@@ -723,8 +723,11 @@ GAFF_atom_typing (MOL2 ** mymols)
 		  flag2 = 0;
 		  flag = 0;
 		  flag3 = 0;
+		  ewg = 0;
 		  for (j = 0; j < k; ++j)
 		    {
+	              if( mols->aromatic[vecinos[j]] != 0)
+			     ewg = 1;
 		      if (mols->atoms[vecinos[j]] == 2)
 			flag2++;
 		      else if (mols->gaff_types[vecinos[j]] == C)
@@ -750,7 +753,7 @@ GAFF_atom_typing (MOL2 ** mymols)
 			  if (verboseflag == 1)
 			    printf ("%i tipo N.\n", i);
 			}
-		      else if (flag3 == 1)
+		      else if (flag3 == 1 || ewg == 1)
 			{
 
 			  mols->gaff_types[i] = NH;
