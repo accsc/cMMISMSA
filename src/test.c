@@ -1218,8 +1218,8 @@ main (argc, argv)
     }
 
   dump_pdb_conservative_file (mol, f_pdb_byres);
-  for( j = 0; j < mol->n_atoms; j++)
-  printf("%i %s %s %i %i %i %i %f\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], mol->gaff_types[j], mol->pcharges[j] );
+/*  for( j = 0; j < mol->n_atoms; j++)
+  printf("%i %s %s %i %i %i %i %f\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], mol->gaff_types[j], mol->pcharges[j] );*/
 
   if (mdcrd_mode == 1 || pdb_mode == 2)
     {

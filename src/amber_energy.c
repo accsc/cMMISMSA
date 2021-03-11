@@ -45,7 +45,7 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
                 last_atom = -1;
                 if( mol->backbone[i] == 0 || mol->exclude[i] == 1)
                         continue;
-                fprintf(stderr,"Current charge: %i %f\n",i,mol->pcharges[i]);
+                /*fprintf(stderr,"Current charge: %i %f\n",i,mol->pcharges[i]);*/
 
                 for ( j = 0; j < mol->n_atoms; ++j)
                 {

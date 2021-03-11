@@ -197,7 +197,7 @@ float assign_formal_charge(MOL2 *mol, int i, int atom_type, int gaff_type)
         formal_charge = 1.0;
     else if( gaff_type == O && bond_order == 1)
     {
-        fprintf(stderr,"Prev %f\n",formal_charge);
+        /*fprintf(stderr,"Prev %f\n",formal_charge);*/
         formal_charge = -0.5;
     }
 
@@ -272,19 +272,19 @@ void assign_gasteiger(MOL2 **mymol)
 
 
 
-    fprintf(stderr,"Charges:\n");
+/*    fprintf(stderr,"Charges:\n");*/
     for( i = 0; i < mol->n_atoms; i++)
     {
-        fprintf(stderr,"%i %s %f\n",i, let[mol->gaff_types[i]-1], assign_formal_charge(mol, i, mol->atoms[i], mol->gaff_types[i]));
+/*        fprintf(stderr,"%i %s %f\n",i, let[mol->gaff_types[i]-1], assign_formal_charge(mol, i, mol->atoms[i], mol->gaff_types[i]));*/
         fcharges[i] = assign_formal_charge(mol, i, mol->atoms[i], mol->gaff_types[i]) / scaling_factor;
         ccharges[i] = 0.0f;
         deltas[i] = 0.0f;
         abs_chg += fabs(fcharges[i]);
         poly[i] = get_polynomial_index(mol, i);
-        if (poly[i] < 0)
+/*        if (poly[i] < 0)
             fprintf(stderr,"Error for %i\n",i);
         else
-            fprintf(stderr,"FC: %f\n",fcharges[i]);
+            fprintf(stderr,"FC: %f\n",fcharges[i]);*/
 
     }
 
@@ -306,7 +306,7 @@ void assign_gasteiger(MOL2 **mymol)
 
                 if( neig >= 0)
                 {
-                   fprintf(stderr,"Atom %i. Neig %i. %s %s \n",j,neig,let[mol->gaff_types[j]-1],let[mol->gaff_types[neig]-1]);
+                   /*fprintf(stderr,"Atom %i. Neig %i. %s %s \n",j,neig,let[mol->gaff_types[j]-1],let[mol->gaff_types[neig]-1]);*/
                    chi2 = electronegativity(ccharges[neig], polynomial_terms[poly[neig]], mol->atoms[neig]);
                    diff_chi = chi2 - chi1;
                    
@@ -316,10 +316,10 @@ void assign_gasteiger(MOL2 **mymol)
                        chi_norm = electronegativity(1.0, polynomial_terms[poly[neig]], mol->atoms[neig]);
 
                    deltas[j] += (diff_chi / chi_norm) * (powf(0.778, (i + 1)));
-                   fprintf(stderr,"%i chi1: %f chi2: %f chi_norm: %f Adding: %f\n",j,chi1,chi2, chi_norm, (diff_chi / chi_norm) * (powf(0.778, (i + 1))));
+                   /*fprintf(stderr,"%i chi1: %f chi2: %f chi_norm: %f Adding: %f\n",j,chi1,chi2, chi_norm, (diff_chi / chi_norm) * (powf(0.778, (i + 1))));*/
                 }
             }
-            fprintf(stderr,"%i %f %f\n", j, chi1, deltas[j]);
+            /*fprintf(stderr,"%i %f %f\n", j, chi1, deltas[j]);*/
         }
 
 
@@ -331,7 +331,7 @@ void assign_gasteiger(MOL2 **mymol)
                 ccharges[j] += deltas[j] + (1.0/6.0) * fcharges[j];
             }
 
-            fprintf(stderr,"Cycle %i: %i %f\n",i,j,deltas[j]);
+            /*fprintf(stderr,"Cycle %i: %i %f\n",i,j,deltas[j]);*/
 
         }
 
@@ -341,7 +341,7 @@ void assign_gasteiger(MOL2 **mymol)
     for( j = 0; j < mol->n_atoms; j++)
     {
         ccharges[j] *= scaling_factor;
-        fprintf(stderr,"%i %f\n", j, ccharges[j]);
+        /*fprintf(stderr,"%i %f\n", j, ccharges[j]);*/
         mol->pcharges[j] = ccharges[j];
     }
 
