@@ -39,6 +39,7 @@ int cleanup(MOL2 **mymols)
 	free(mols->atoms);
 	free(mols->ringer);
 	free(mols->aromatic);
+	free(mols->exclude);
 	free(mols->bonds);
 	free(mols->bond_a1);
 	free(mols->bond_a2);

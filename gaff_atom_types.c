@@ -936,6 +936,19 @@ GAFF_atom_typing (MOL2 ** mymols)
 
     }
 
+/* Fix amides which are too close */
+
+   for( i = 0; i < mols->n_bonds; i++)
+   {
+     flag = mols->bond_a1[i]-1;
+     flag2 = mols->bond_a2[i]-1;
+     if( ((mols->gaff_types[flag] == N && mols->gaff_types[flag2] == C) || (mols->gaff_types[flag2] == C && mols->gaff_types[flag] == N)) && mols->bonds[i] == 2)
+     {
+        mols->bonds[i] = 1;
+     }
+
+   }
+
 
   free (vecinos);
   free (vecinos2);

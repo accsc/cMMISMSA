@@ -757,7 +757,8 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 
 	  if (current_conformer == 0)
 	    {
-	      mols->pcharges[current_atom] = atof (tmp_charge);
+	      mols->pcharges[current_atom] = 0;
+	      /*mols->pcharges[current_atom] = atof (tmp_charge);*/
 	      mols->radius[current_atom] = atof (tmp_radius);
 
 	      if (tmp_atom[0] == 'C'
@@ -869,8 +870,8 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
 	  mols->conformers[current_conformer].x[current_atom] = atof (myx);
 	  mols->conformers[current_conformer].y[current_atom] = atof (myy);
 	  mols->conformers[current_conformer].z[current_atom] = atof (myz);
-	  mols->conformers[current_conformer].pcharges[current_atom] =
-	    atof (tmp_charge);
+	  mols->conformers[current_conformer].pcharges[current_atom] = 0;
+	  /*  atof (tmp_charge);*/
 	  mols->conformers[current_conformer].radius[current_atom] =
 	    atof (tmp_radius);
 
