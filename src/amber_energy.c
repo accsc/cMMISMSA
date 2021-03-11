@@ -65,7 +65,7 @@ float get_pdb_vdw_selected(MOL2 *mol, float ***byres, float *vdw_result, float *
 
                                 dScreening = ((78.39 + 1.0) / (1.0 + cte * exp(-lambda * (78.39 + 1.0) * dist))) - 1;
                                 tmpE = 332.0 * mol->pcharges[i]*mol->pcharges[j]*distr/dScreening;
-                                fprintf(stderr,"Prot charge: %i %f\n",j, mol->pcharges[j]);
+                                /*fprintf(stderr,"Prot charge: %i %f\n",j, mol->pcharges[j]);*/
 
                                 qqE += tmpE;
 

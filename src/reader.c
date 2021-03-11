@@ -356,7 +356,12 @@ PDB_reader (MOL2 ** mymol, char *finput_name, int import)
       else if (strstr (line, "ATOM") != NULL
 	       || strstr (line, "HETATM") != NULL)
 	{
-	  sscanf (line, "%*s %*d %4s", tmp_atom);
+
+      if( line[12] == ' ')
+        strncpy(tmp_atom, &line[13],3);
+      else
+        strncpy(tmp_atom, &line[12],4);
+
 /*			strncpy(tmp_charge, &line[60], 8);
 			strncpy(tmp_radius, &line[56], 4);*/
 
@@ -494,6 +499,22 @@ PDB_reader (MOL2 ** mymol, char *finput_name, int import)
   return 0;
 }
 
+
+int check_assign_types (MOL2 *mol)
+{
+    int ret = 0, i = 0;
+
+    for(i = 0; i < mol->n_atoms; i++)
+    {
+        if( mol->gaff_types[i] < 0)
+        {
+            fprintf(stderr,"ATOM Type: %i Number:%i Name:%s Residue:%s-%i iResNum: %i has no valid type\n",mol->atoms[i],i,mol->atom_names[i],mol->res_names[i],mol->res_num[i],mol->internal_res_num[i]);
+            ret = 1;
+        }
+    }
+    return ret;
+}
+
 /**
  *
  *	@brief Percieve connectivity of the molecule (bonds, angles, torsionals, rings, aromaticity, etc.)
@@ -539,6 +560,8 @@ mol_percieve (MOL2 ** mymol)
     assign_pairs (&mols);
 
   *mymol = mols;
+
+    return 0;
 
 }
 
@@ -748,7 +771,12 @@ MultiPDB_reader (MOL2 ** mymol, char *finput_name, int import)
       else if (strstr (line, "ATOM") != NULL
 	       || strstr (line, "HETATM") != NULL)
 	{
-	  sscanf (line, "%*s %*d %4s", tmp_atom);
+      if( line[12] == ' ')
+        strncpy(tmp_atom, &line[13],3);
+      else
+        strncpy(tmp_atom, &line[12],4);
+	  /*sscanf (line, "%*s %*d %4s", tmp_atom);*/
+
 /*			strncpy(tmp_charge, &line[60], 8);
 			strncpy(tmp_radius, &line[56], 4);*/
 

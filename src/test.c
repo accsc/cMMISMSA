@@ -530,6 +530,7 @@ main (argc, argv)
 	  load_crd (&mol, rst_file, topo);
 	}
     }
+
   /* Split ligand and protein in two MOLs to use standard routines */
   split_amber_mol (&mol, &lig, &prot);
 
@@ -1580,8 +1581,8 @@ main (argc, argv)
   /*clean_amber_split_mol (&prot);*/
   cleanup (&prot);
 
-  free (lig);
-  free (prot);
+  /*free (lig);
+  free (prot);*/
 
 
 }

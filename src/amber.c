@@ -93,6 +93,8 @@ int split_amber_mol(MOL2 **mymol, MOL2 **mylig, MOL2 **myprot)
 
 	mol_percieve(&lig);
 	mol_percieve(&prot);
+    check_assign_types(lig);
+    check_assign_types(prot);
 
     assign_gasteiger(&lig);
 
