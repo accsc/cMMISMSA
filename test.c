@@ -531,7 +531,7 @@ main (argc, argv)
 	}
     }
   /* Split ligand and protein in two MOLs to use standard routines */
-  split_amber_mol (mol, &lig, &prot);
+  split_amber_mol (&mol, &lig, &prot);
 
   /* Calculate last residue from protein */
   nres = 1;
@@ -1218,7 +1218,7 @@ main (argc, argv)
 
   dump_pdb_conservative_file (mol, f_pdb_byres);
   for( j = 0; j < mol->n_atoms; j++)
-  printf("%i %s %s %i %i %i %s\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], let[ mol->gaff_types[j] -1 ]);
+  printf("%i %s %s %i %i %i %i %f\n", j, mol->atom_names[j], mol->res_names[j], mol->res_num[j], mol->ringer[j], mol->aromatic[j], mol->gaff_types[j], mol->pcharges[j] );
 
   if (mdcrd_mode == 1 || pdb_mode == 2)
     {
@@ -1575,8 +1575,10 @@ main (argc, argv)
       cleanup (&mol);
     }
 
-  clean_amber_split_mol (&lig);
-  clean_amber_split_mol (&prot);
+  /*clean_amber_split_mol (&lig);*/
+  cleanup (&lig);
+  /*clean_amber_split_mol (&prot);*/
+  cleanup (&prot);
 
   free (lig);
   free (prot);
