@@ -65,10 +65,6 @@
  *
  */
 
-/** XDRFILE lib for XTC file support */
-#include "xdrfile_xtc.h"
-#include "xdrfile.c"
-#include "xdrfile_xtc.c"
 /* This is for reading molecules and other stuff */
 #include <mol/reader.c>
 /* Memory clean up*/
@@ -78,7 +74,7 @@
 /* I/O and energy function for AMBER files and force field */
 #include <amber/amber.c>
 /* I/O extension to read XTC trajectories from GROMACS*/
-#include <gromacs.c>
+#include <gromacs/gromacs.c>
 /* Atom masks routines */
 #include <masks.c>
 /* Protein trans-rot fitting routines */

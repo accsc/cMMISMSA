@@ -18,6 +18,11 @@
  *	GNU General Public License for more details.
  */
 
+/** XDRFILE lib for XTC file support */
+#include <gromacs/xdrfile_xtc.h>
+#include <gromacs/xdrfile.c>
+#include <gromacs/xdrfile_xtc.c>
+
 #include <amber/amber.h>
 #include <amber/amber_topology.c>
 #include <amber/amber_coordinates.c>
