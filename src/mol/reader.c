@@ -25,13 +25,6 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-
 /* Molecular library definitions */
 #include <mol/libmol2.h>
 /* GAFF force field definitions and constants */

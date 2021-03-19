@@ -66,9 +66,7 @@
  */
 
 /* This is for reading molecules and other stuff */
-#include <mol/reader.c>
-/* Memory clean up*/
-#include <mol/waste.c>
+#include <mol/mol.c>
 /* Implict Solvation Model support */
 #include <ism/ism.c>
 /* I/O and energy function for AMBER files and force field */
@@ -77,8 +75,6 @@
 #include <gromacs/gromacs.c>
 /* Atom masks routines */
 #include <masks.c>
-/* Protein trans-rot fitting routines */
-#include <superimpose.c>
 /* Diagonalization support throught LAPACKe C interface */
 #ifdef _ENTROPY
 #include <lapacke.h>
