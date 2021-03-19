@@ -70,9 +70,9 @@
 #include "xdrfile.c"
 #include "xdrfile_xtc.c"
 /* This is for reading molecules and other stuff */
-#include <reader.c>
+#include <mol/reader.c>
 /* Memory clean up*/
-#include <waste.c>
+#include <mol/waste.c>
 /* Implict Solvation Model support */
 #include <ism/ism.c>
 /* I/O and energy function for AMBER files and force field */

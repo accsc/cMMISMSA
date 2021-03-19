@@ -30,32 +30,29 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
-
-/* Molecular library definitions */
-#include <libmol2.h>
-
-/* GAFF force field definitions and constants */
-#include <gaff.h>
-
 #include <time.h>
 
+/* Molecular library definitions */
+#include <mol/libmol2.h>
+/* GAFF force field definitions and constants */
+#include <mol/gaff.h>
 /* General tools for reader */
-#include "groups.c"
+#include <mol/groups.c>
 /* Ring detection routines */
-#include "rings.c"
+#include <mol/rings.c>
 
 #define G_PI 3.14159265358979323846
 
 /* Energetic calculation routines */
-#include "conformers.c"
-#include "energy.c"
-#include "assign_bonds.c"
-#include "assign_angles.c"
-#include "assign_torsionals.c"
-#include "assign_pairs.c"
-#include "gaff_atom_types.c"
-#include "assign_gasteiger.c"
-#include "residues.c"
+#include <mol/conformers.c>
+#include <mol/energy.c>
+#include <mol/assign_bonds.c>
+#include <mol/assign_angles.c>
+#include <mol/assign_torsionals.c>
+#include <mol/assign_pairs.c>
+#include <mol/gaff_atom_types.c>
+#include <mol/assign_gasteiger.c>
+#include <mol/residues.c>
 
 #define MAX_BUFFER 1024
 
