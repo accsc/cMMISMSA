@@ -74,7 +74,7 @@
 /* Memory clean up*/
 #include <waste.c>
 /* Implict Solvation Model support */
-#include <ism.c>
+#include <ism/ism.c>
 /* I/O and energy function for AMBER files and force field */
 #include <amber.c>
 /* I/O extension to read XTC trajectories from GROMACS*/
