@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ism/ism.h>
+#include <ism/ism_set.c>
 #include <ism/ism_overlaps.c>
 #include <ism/ism_typing.c>
 #include <ism/ism_sasa.c>
