@@ -18,10 +18,10 @@
  *	GNU General Public License for more details.
  */
 
-#include "amber.h"
-#include "amber_topology.c"
-#include "amber_coordinates.c"
-#include "amber_energy.c"
+#include <amber/amber.h>
+#include <amber/amber_topology.c>
+#include <amber/amber_coordinates.c>
+#include <amber/amber_energy.c>
 
 
 
