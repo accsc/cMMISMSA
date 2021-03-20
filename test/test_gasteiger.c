@@ -23,6 +23,7 @@
 #include <mol/mol.c>
 #include <amber/amber.c>
 
+
 int
 main (argc, argv)
      int argc;
@@ -30,15 +31,16 @@ main (argc, argv)
 {
 
   int i = 0;
+  float s = 0.0;
   MOL2 *mol = NULL;
   MultiPDB_reader (&mol, argv[1], 0);
   mol_percieve(&mol);
+  assign_gasteiger(&mol);
   for( i = 0; i < mol->n_atoms; i++)
   {
-	  if( mol->gaff_types[i] > 0)
-	  	printf("%s\n", let[mol->gaff_types[i]-1]);
-	  else
-	  	printf("%i\n", mol->gaff_types[i]-1);
+	  	printf("%f\n", mol->pcharges[i]);
+		s = s + mol->pcharges[i];
   }
+  printf("%f\n",s);
 
 }

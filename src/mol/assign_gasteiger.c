@@ -275,7 +275,7 @@ void assign_gasteiger(MOL2 **mymol)
 /*    fprintf(stderr,"Charges:\n");*/
     for( i = 0; i < mol->n_atoms; i++)
     {
-/*        fprintf(stderr,"%i %s %f\n",i, let[mol->gaff_types[i]-1], assign_formal_charge(mol, i, mol->atoms[i], mol->gaff_types[i]));*/
+        /*fprintf(stderr,"%i %s %f\n",i, let[mol->gaff_types[i]-1], assign_formal_charge(mol, i, mol->atoms[i], mol->gaff_types[i]));*/
         fcharges[i] = assign_formal_charge(mol, i, mol->atoms[i], mol->gaff_types[i]) / scaling_factor;
         ccharges[i] = 0.0f;
         deltas[i] = 0.0f;

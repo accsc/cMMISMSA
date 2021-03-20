@@ -4,7 +4,7 @@
  *	@brief Main file of the cMMISMSA scoring function tool.
  *
  *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
- *	@date 23/09/2015
+ *	@date 2021/03
  *
  * 	This program is free software; you can redistribute it and/or modify
  * 	it under the terms of the GNU General Public License as published by
@@ -27,14 +27,15 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
 /*
- *  Rev 5 - February 2021
+ *      Rev 5 - February 2021
  *        - Fixed bugs in PDB atom typing and protein typing based on dictionary
  *        - Fixed bugs in PDB procesing (multichain systems)
  *        - Major code refactoring
+ *        - Added tests
  *
  *	Rev 4 - March 2018
  *        - Added full vdW/qq/solv residue decomposition in output for COMBINE-like methods
- *        - Added support for XTC GROMACS trajectories (still require AMBER topology)
+ *        - Added support for XTC GROMACS trajectories (still requires AMBER topology)
  *        - Excluded atoms mask selects individual atoms and not full residues to allow
  *          better analysis of protein interfaces and Ala-scanning
  *        - LAPACK can be disabled on copilation time to enable a more portable code
@@ -97,17 +98,14 @@ main (argc, argv)
      char *argv[];
 {
 
-
   MOL2 *mol = NULL;
   TOP *topo = NULL;
   MOL2 *lig = NULL;
   MOL2 *prot = NULL;
-
-
-  float MMenergy = 0, desolvEnergy = 0, totalEnergy = 0;
   ISM_COMPLEX *ism_complex = NULL;
 
-  /* General */
+  /* Energy contributions */
+  float MMenergy = 0, desolvEnergy = 0, totalEnergy = 0;
   float desolvR = 0.0f, desolvL = 0.0f, apolarcomplex = 0.0f;
 
   /* Residue decomposition */
@@ -350,8 +348,8 @@ main (argc, argv)
     }
   else
     {
-      /*		PDB_reader(&mol,pdb_file,0);*//* Load and perciebe PDB */
-      MultiPDB_reader (&mol, pdb_file, 0);	/* Load and perciebe PDB */
+      /*		PDB_reader(&mol,pdb_file,0);*//* Load and percieve PDB */
+      MultiPDB_reader (&mol, pdb_file, 0);	/* Load and percieve PDB */
       fprintf (stderr, "PDB loaded\n");
       fflush (stderr);
     }
@@ -522,9 +520,9 @@ main (argc, argv)
     }
 
 
-	/*************************
- 	*	ISM BLOCK
-	*************************/
+/*************************
+*	ISM BLOCK
+*************************/
 
   /* ISM atom typing */
   ism_typing (&lig);
@@ -542,21 +540,20 @@ main (argc, argv)
 
   /* Remove excluded atoms */
   for (i = 0; i < prot->n_atoms; i++)
-    {
-      if (prot->vdw_selection[i] == 2)
-	{
-	  prot->ism_selection[i] = 0;
-	}
-    }
+  {
+    if (prot->vdw_selection[i] == 2)
+      {
+        prot->ism_selection[i] = 0;
+      }
+  }
 
 
   ISM_init(&ism_complex, lig, prot);
 
 
-
-	/********************************
-  	*	END OF ISM SETUP
- 	*********************************/
+/********************************
+*	END OF ISM SETUP
+*********************************/
 
 	/********************************
  	*	OUTPUT FILES
@@ -1301,14 +1298,8 @@ main (argc, argv)
       cleanup (&mol);
     }
 
-  /*clean_amber_split_mol (&lig);*/
   cleanup (&lig);
-  /*clean_amber_split_mol (&prot);*/
   cleanup (&prot);
-
-  /*free (lig);
-  free (prot);*/
-
 
 }
 
