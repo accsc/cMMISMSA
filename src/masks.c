@@ -3,8 +3,8 @@
  *      @file masks.c
  *      @brief Atom selector masks
  *
- *      @author Alvaro Cortes Cabrera <alvaro.cortes@uah.es>
- *      @date 09/04/2014
+ *      @author Alvaro Cortes Cabrera <alvarocortesc@gmail.com<
+ *      @date 2021/03
  *
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by

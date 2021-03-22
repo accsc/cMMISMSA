@@ -4,7 +4,7 @@
  *	@brief Main file of the cMMISMSA scoring function tool.
  *
  *	@author Alvaro Cortes Cabrera <alvarocortesc@gmail.com>
- *	@date 23/09/2015
+ *	@date 2021/03
  *
  * 	This program is free software; you can redistribute it and/or modify
  * 	it under the terms of the GNU General Public License as published by
@@ -27,13 +27,15 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
 /*
- *  Rev 5 - February 2021
+ *      Rev 5 - February 2021
  *        - Fixed bugs in PDB atom typing and protein typing based on dictionary
  *        - Fixed bugs in PDB procesing (multichain systems)
+ *        - Major code refactoring
+ *        - Added tests
  *
  *	Rev 4 - March 2018
  *        - Added full vdW/qq/solv residue decomposition in output for COMBINE-like methods
- *        - Added support for XTC GROMACS trajectories (still require AMBER topology)
+ *        - Added support for XTC GROMACS trajectories (still requires AMBER topology)
  *        - Excluded atoms mask selects individual atoms and not full residues to allow
  *          better analysis of protein interfaces and Ala-scanning
  *        - LAPACK can be disabled on copilation time to enable a more portable code
@@ -65,24 +67,16 @@
  *
  */
 
-/** XDRFILE lib for XTC file support */
-#include "xdrfile_xtc.h"
-#include "xdrfile.c"
-#include "xdrfile_xtc.c"
 /* This is for reading molecules and other stuff */
-#include <reader.c>
-/* Memory clean up*/
-#include <waste.c>
+#include <mol/mol.c>
 /* Implict Solvation Model support */
-#include <ism.c>
+#include <ism/ism.c>
 /* I/O and energy function for AMBER files and force field */
-#include <amber.c>
+#include <amber/amber.c>
 /* I/O extension to read XTC trajectories from GROMACS*/
-#include <gromacs.c>
+#include <gromacs/gromacs.c>
 /* Atom masks routines */
 #include <masks.c>
-/* Protein trans-rot fitting routines */
-#include <superimpose.c>
 /* Diagonalization support throught LAPACKe C interface */
 #ifdef _ENTROPY
 #include <lapacke.h>
@@ -104,51 +98,14 @@ main (argc, argv)
      char *argv[];
 {
 
-
   MOL2 *mol = NULL;
   TOP *topo = NULL;
   MOL2 *lig = NULL;
   MOL2 *prot = NULL;
+  ISM_COMPLEX *ism_complex = NULL;
 
-
+  /* Energy contributions */
   float MMenergy = 0, desolvEnergy = 0, totalEnergy = 0;
-
-  /* Desolvation */
-  /* Protein */
-  int *numOverlaps_prot = NULL, *buried_prot = NULL, **OverlapsMatrix_prot =
-    NULL;
-  float **AijMatrix_prot = NULL;
-  float **lcpoComps_prot = NULL, *total_surface_prot = NULL;
-  float *atomSASA_prot = NULL, *atomSASAComplex_prot = NULL, r1 = 0.0f;
-  float *atomSASAH_prot = NULL;
-  /* Ligand */
-  float **matrix = NULL;
-  int *numOverlaps = NULL, *buried = NULL, **OverlapsMatrix = NULL;
-  float **AijMatrix = NULL;
-  float **lcpoComps = NULL, *total_surface = NULL;
-  float *atomSASA = NULL, *atomSASAComplex = NULL;
-  float *atomSASAH = NULL;
-  /* Complex */
-  int *buried_lig_complex = NULL, *buried_prot_complex = NULL;
-  float **AijMatrixLig = NULL, **AijMatrixProt = NULL;
-  int *numOverlapsLigComplex = NULL, *numOverlapsProtComplex = NULL;
-  int **OverlapsMatrixLig = NULL, **OverlapsMatrixProt;
-  /* H-bonds */
-  float *ga = NULL, *ga_prot = NULL;
-  /* Intra-molecular bonds */
-  int *numOverlaps_hbond_prot = NULL, *buried_hbond_prot =
-    NULL, **OverlapsMatrix_hbond_prot = NULL;
-  float **AijMatrix_hbond_prot = NULL;
-  int *numOverlaps_hbond = NULL, *buried_hbond =
-    NULL, **OverlapsMatrix_hbond = NULL;
-  float **AijMatrix_hbond = NULL;
-  /* Inter-molecular bonds */
-  int *buried_lig_complex_hbond = NULL, *buried_prot_complex_hbond = NULL;
-  float **AijMatrixLig_hbond = NULL, **AijMatrixProt_hbond = NULL;
-  int *numOverlapsLigComplex_hbond = NULL, *numOverlapsProtComplex_hbond =
-    NULL;
-  int **OverlapsMatrixLig_hbond = NULL, **OverlapsMatrixProt_hbond = NULL;
-  /* General */
   float desolvR = 0.0f, desolvL = 0.0f, apolarcomplex = 0.0f;
 
   /* Residue decomposition */
@@ -391,8 +348,8 @@ main (argc, argv)
     }
   else
     {
-      /*		PDB_reader(&mol,pdb_file,0);*//* Load and perciebe PDB */
-      MultiPDB_reader (&mol, pdb_file, 0);	/* Load and perciebe PDB */
+      /*		PDB_reader(&mol,pdb_file,0);*//* Load and percieve PDB */
+      MultiPDB_reader (&mol, pdb_file, 0);	/* Load and percieve PDB */
       fprintf (stderr, "PDB loaded\n");
       fflush (stderr);
     }
@@ -563,9 +520,9 @@ main (argc, argv)
     }
 
 
-	/*************************
- 	*	ISM BLOCK
-	*************************/
+/*************************
+*	ISM BLOCK
+*************************/
 
   /* ISM atom typing */
   ism_typing (&lig);
@@ -583,170 +540,20 @@ main (argc, argv)
 
   /* Remove excluded atoms */
   for (i = 0; i < prot->n_atoms; i++)
-    {
-      if (prot->vdw_selection[i] == 2)
-	{
-	  prot->ism_selection[i] = 0;
-	}
-    }
+  {
+    if (prot->vdw_selection[i] == 2)
+      {
+        prot->ism_selection[i] = 0;
+      }
+  }
 
 
-  /* Initiallize vars for three layers */
-  ga = (float *) calloc (sizeof (float), lig->n_atoms);
-  ga_prot = (float *) calloc (sizeof (float), prot->n_atoms);
-
-  buried = (int *) calloc (sizeof (int), lig->n_atoms);
-  numOverlaps = (int *) calloc (sizeof (int), lig->n_atoms);
-  AijMatrix = (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  OverlapsMatrix = (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-  lcpoComps = (float **) calloc (sizeof (float *), lig->n_atoms);
-  total_surface = (float *) calloc (sizeof (float), lig->n_atoms);
-  atomSASA = (float *) calloc (sizeof (float), lig->n_atoms);
-  atomSASAComplex = (float *) calloc (sizeof (float), lig->n_atoms);
-  atomSASAH = (float *) calloc (sizeof (float), lig->n_atoms);
-
-  matrix = (float **) calloc (sizeof (float *), lig->n_atoms);
-
-  buried_hbond = (int *) calloc (sizeof (int), lig->n_atoms);
-  numOverlaps_hbond = (int *) calloc (sizeof (int), lig->n_atoms);
-  AijMatrix_hbond =
-    (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  OverlapsMatrix_hbond =
-    (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-
-  for (i = 0; i < lig->n_atoms; i++)
-    {
-      lcpoComps[i] = (float *) calloc (sizeof (float), 4);
-      matrix[i] = (float *) calloc (sizeof (float), lig->n_atoms);
-    }
-
-  for (i = 0; i < ISM_MAX_OVERLAPS; i++)
-    {
-      OverlapsMatrix[i] = (int *) calloc (sizeof (int), lig->n_atoms);
-      AijMatrix[i] = (float *) calloc (sizeof (float), lig->n_atoms);
-
-      OverlapsMatrix_hbond[i] = (int *) calloc (sizeof (int), lig->n_atoms);
-      AijMatrix_hbond[i] = (float *) calloc (sizeof (float), lig->n_atoms);
-
-    }
-
-  /* Free SASA Hard spheres no overlapping model */
-  for (i = 0; i < lig->n_atoms; i++)
-    {
-      if (lig->atoms[i] <= 100)
-	r1 = ism_radii[lig->atoms[i] - 1];
-      else
-	r1 = ism_radii_metals[lig->atoms[i] - 1];
-
-      r1 = r1 + ISM_PROBE;
-
-      total_surface[i] = 4.0f * ISM_PI * (r1 * r1);
-    }
+  ISM_init(&ism_complex, lig, prot);
 
 
-  buried_lig_complex = (int *) calloc (sizeof (int), lig->n_atoms);
-  buried_prot_complex = (int *) calloc (sizeof (int), prot->n_atoms);
-  AijMatrixLig = (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  AijMatrixProt = (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  numOverlapsLigComplex = (int *) calloc (sizeof (int), lig->n_atoms);
-  numOverlapsProtComplex = (int *) calloc (sizeof (int), prot->n_atoms);
-  OverlapsMatrixLig = (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-  OverlapsMatrixProt = (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-
-  buried_lig_complex_hbond = (int *) calloc (sizeof (int), lig->n_atoms);
-  buried_prot_complex_hbond = (int *) calloc (sizeof (int), prot->n_atoms);
-  AijMatrixLig_hbond =
-    (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  AijMatrixProt_hbond =
-    (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  numOverlapsLigComplex_hbond = (int *) calloc (sizeof (int), lig->n_atoms);
-  numOverlapsProtComplex_hbond = (int *) calloc (sizeof (int), prot->n_atoms);
-  OverlapsMatrixLig_hbond =
-    (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-  OverlapsMatrixProt_hbond =
-    (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-
-  for (i = 0; i < ISM_MAX_OVERLAPS; i++)
-    {
-      OverlapsMatrixLig[i] = (int *) calloc (sizeof (int), lig->n_atoms);
-      OverlapsMatrixProt[i] = (int *) calloc (sizeof (int), prot->n_atoms);
-      AijMatrixLig[i] = (float *) calloc (sizeof (float), lig->n_atoms);
-      AijMatrixProt[i] = (float *) calloc (sizeof (float), prot->n_atoms);
-    }
-
-  for (i = 0; i < ISM_MAX_OVERLAPS; i++)
-    {
-      OverlapsMatrixLig_hbond[i] =
-	(int *) calloc (sizeof (int), lig->n_atoms);
-      OverlapsMatrixProt_hbond[i] =
-	(int *) calloc (sizeof (int), prot->n_atoms);
-      AijMatrixLig_hbond[i] = (float *) calloc (sizeof (float), lig->n_atoms);
-      AijMatrixProt_hbond[i] =
-	(float *) calloc (sizeof (float), prot->n_atoms);
-    }
-
-  buried_prot = (int *) calloc (sizeof (int), prot->n_atoms);
-  numOverlaps_prot = (int *) calloc (sizeof (int), prot->n_atoms);
-  AijMatrix_prot = (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  OverlapsMatrix_prot =
-    (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-  lcpoComps_prot = (float **) calloc (sizeof (float *), prot->n_atoms);
-  total_surface_prot = (float *) calloc (sizeof (float), prot->n_atoms);
-  atomSASA_prot = (float *) calloc (sizeof (float), prot->n_atoms);
-  atomSASAComplex_prot = (float *) calloc (sizeof (float), prot->n_atoms);
-  atomSASAH_prot = (float *) calloc (sizeof (float), prot->n_atoms);
-
-
-  buried_hbond_prot = (int *) calloc (sizeof (int), prot->n_atoms);
-  numOverlaps_hbond_prot = (int *) calloc (sizeof (int), prot->n_atoms);
-  AijMatrix_hbond_prot =
-    (float **) calloc (sizeof (float *), ISM_MAX_OVERLAPS + 1);
-  OverlapsMatrix_hbond_prot =
-    (int **) calloc (sizeof (int *), ISM_MAX_OVERLAPS + 1);
-
-
-  for (i = 0; i < prot->n_atoms; i++)
-    {
-      lcpoComps_prot[i] = (float *) calloc (sizeof (float), 4);
-
-    }
-
-  for (i = 0; i < ISM_MAX_OVERLAPS; i++)
-    {
-      OverlapsMatrix_prot[i] = (int *) calloc (sizeof (int), prot->n_atoms);
-      AijMatrix_prot[i] = (float *) calloc (sizeof (float), prot->n_atoms);
-
-      OverlapsMatrix_hbond_prot[i] =
-	(int *) calloc (sizeof (int), prot->n_atoms);
-      AijMatrix_hbond_prot[i] =
-	(float *) calloc (sizeof (float), prot->n_atoms);
-
-    }
-
-  for (i = 0; i < prot->n_atoms; i++)
-    {
-      if (prot->ism_selection[i] == 1)
-	{
-	  if (prot->atoms[i] <= 100)
-	    r1 = ism_radii[prot->atoms[i] - 1];
-	  else
-	    r1 = ism_radii_metals[prot->atoms[i] - 1];
-
-	  r1 = r1 + ISM_PROBE;
-
-	  total_surface_prot[i] = 4.0f * ISM_PI * (r1 * r1);
-	}
-      else
-	{
-	  total_surface_prot[i] = 0.0f;
-	}
-    }
-
-  /* End of ISM allocation */
-
-	/********************************
-  	*	END OF ISM SETUP
- 	*********************************/
+/********************************
+*	END OF ISM SETUP
+*********************************/
 
 	/********************************
  	*	OUTPUT FILES
@@ -909,101 +716,103 @@ main (argc, argv)
       if (ism_flag == 1)
 	{
 
-	  ism_getInternalOverlaps_prot (prot, &numOverlaps_prot, &buried_prot,
-					&AijMatrix_prot,
-					&OverlapsMatrix_prot);
-	  ism_get_free_sasa_prot (prot, total_surface_prot, buried_prot,
-				  numOverlaps_prot, AijMatrix_prot,
-				  OverlapsMatrix_prot, &lcpoComps_prot,
-				  &atomSASA_prot);
-	  ism_get_distance_matrix (lig, &matrix);
-	  ism_getInternalOverlaps (lig, matrix, &numOverlaps, &buried,
-				   &AijMatrix, &OverlapsMatrix);
-	  ism_get_free_sasa (lig, total_surface, buried, numOverlaps,
-			     AijMatrix, OverlapsMatrix, &lcpoComps,
-			     &atomSASA);
-	  ism_getExternalOverlaps (lig, prot, &buried_lig_complex,
-				   &buried_prot_complex,
-				   &numOverlapsLigComplex,
-				   &numOverlapsProtComplex,
-				   &OverlapsMatrixLig, &OverlapsMatrixProt,
-				   &AijMatrixLig, &AijMatrixProt);
-	  ism_get_complex_sasa (lig, total_surface, buried,
-				buried_lig_complex, numOverlaps,
-				numOverlapsLigComplex, numOverlaps_prot,
-				numOverlapsProtComplex, AijMatrix,
-				AijMatrixLig, AijMatrix_prot, AijMatrixProt,
-				OverlapsMatrix, OverlapsMatrixLig,
-				OverlapsMatrix_prot, OverlapsMatrixProt,
-				lcpoComps, &atomSASAComplex);
-	  ism_get_complex_sasa_prot (prot, total_surface_prot, buried_prot,
-				     buried_prot_complex, numOverlaps_prot,
-				     numOverlapsProtComplex, numOverlaps,
-				     numOverlapsLigComplex, AijMatrix_prot,
-				     AijMatrixProt, AijMatrix, AijMatrixLig,
-				     OverlapsMatrix_prot, OverlapsMatrixProt,
-				     OverlapsMatrix, OverlapsMatrixLig,
-				     lcpoComps_prot, &atomSASAComplex_prot);
+	  ism_getInternalOverlaps_prot (prot, &(ism_complex->numOverlaps_prot), &(ism_complex->buried_prot),
+					&(ism_complex->AijMatrix_prot),
+					&(ism_complex->OverlapsMatrix_prot));
+
+	  ism_get_free_sasa_prot (prot, ism_complex->total_surface_prot, ism_complex->buried_prot,
+				  ism_complex->numOverlaps_prot, ism_complex->AijMatrix_prot,
+				  ism_complex->OverlapsMatrix_prot, &(ism_complex->lcpoComps_prot),
+				  &(ism_complex->atomSASA_prot));
+	  ism_get_distance_matrix (lig, &(ism_complex->matrix));
+	  ism_getInternalOverlaps (lig, ism_complex->matrix, &(ism_complex->numOverlaps), &(ism_complex->buried),
+				   &(ism_complex->AijMatrix), &(ism_complex->OverlapsMatrix));
+	  ism_get_free_sasa (lig, ism_complex->total_surface, ism_complex->buried, ism_complex->numOverlaps,
+			     ism_complex->AijMatrix, ism_complex->OverlapsMatrix, &(ism_complex->lcpoComps),
+			     &(ism_complex->atomSASA));
+	  ism_getExternalOverlaps (lig, prot, &(ism_complex->buried_lig_complex),
+				   &(ism_complex->buried_prot_complex),
+				   &(ism_complex->numOverlapsLigComplex),
+				   &(ism_complex->numOverlapsProtComplex),
+				   &(ism_complex->OverlapsMatrixLig), &(ism_complex->OverlapsMatrixProt),
+				   &(ism_complex->AijMatrixLig), &(ism_complex->AijMatrixProt));
+	  ism_get_complex_sasa (lig, ism_complex->total_surface, ism_complex->buried,
+				ism_complex->buried_lig_complex, ism_complex->numOverlaps,
+				ism_complex->numOverlapsLigComplex, ism_complex->numOverlaps_prot,
+				ism_complex->numOverlapsProtComplex, ism_complex->AijMatrix,
+				ism_complex->AijMatrixLig, ism_complex->AijMatrix_prot, ism_complex->AijMatrixProt,
+				ism_complex->OverlapsMatrix, ism_complex->OverlapsMatrixLig,
+				ism_complex->OverlapsMatrix_prot, ism_complex->OverlapsMatrixProt,
+				ism_complex->lcpoComps, &(ism_complex->atomSASAComplex));
+	  ism_get_complex_sasa_prot (prot, ism_complex->total_surface_prot, ism_complex->buried_prot,
+				     ism_complex->buried_prot_complex, ism_complex->numOverlaps_prot,
+				     ism_complex->numOverlapsProtComplex, ism_complex->numOverlaps,
+				     ism_complex->numOverlapsLigComplex, ism_complex->AijMatrix_prot,
+				     ism_complex->AijMatrixProt, ism_complex->AijMatrix, ism_complex->AijMatrixLig,
+				     ism_complex->OverlapsMatrix_prot, ism_complex->OverlapsMatrixProt,
+				     ism_complex->OverlapsMatrix, ism_complex->OverlapsMatrixLig,
+				     ism_complex->lcpoComps_prot, &(ism_complex->atomSASAComplex_prot));
 	  ism_getExternalOverlaps_forHbonds (lig, prot,
-					     &buried_lig_complex_hbond,
-					     &buried_prot_complex_hbond,
-					     &numOverlapsLigComplex_hbond,
-					     &numOverlapsProtComplex_hbond,
-					     &OverlapsMatrixLig_hbond,
-					     &OverlapsMatrixProt_hbond,
-					     &AijMatrixLig_hbond,
-					     &AijMatrixProt_hbond);
-	  ism_get_complex_sasa_hbond (lig, total_surface, buried_hbond,
-				      buried_lig_complex_hbond,
-				      numOverlaps_hbond,
-				      numOverlapsLigComplex_hbond,
-				      numOverlaps_hbond_prot,
-				      numOverlapsProtComplex_hbond,
-				      AijMatrix_hbond, AijMatrixLig_hbond,
-				      AijMatrix_hbond_prot,
-				      AijMatrixProt_hbond,
-				      OverlapsMatrix_hbond,
-				      OverlapsMatrixLig_hbond,
-				      OverlapsMatrix_hbond_prot,
-				      OverlapsMatrixProt_hbond, lcpoComps,
-				      &atomSASAH);
+					     &(ism_complex->buried_lig_complex_hbond),
+					     &(ism_complex->buried_prot_complex_hbond),
+					     &(ism_complex->numOverlapsLigComplex_hbond),
+					     &(ism_complex->numOverlapsProtComplex_hbond),
+					     &(ism_complex->OverlapsMatrixLig_hbond),
+					     &(ism_complex->OverlapsMatrixProt_hbond),
+					     &(ism_complex->AijMatrixLig_hbond),
+					     &(ism_complex->AijMatrixProt_hbond));
+	  ism_get_complex_sasa_hbond (lig, ism_complex->total_surface, ism_complex->buried_hbond,
+				      ism_complex->buried_lig_complex_hbond,
+				      ism_complex->numOverlaps_hbond,
+				      ism_complex->numOverlapsLigComplex_hbond,
+				      ism_complex->numOverlaps_hbond_prot,
+				      ism_complex->numOverlapsProtComplex_hbond,
+				      ism_complex->AijMatrix_hbond, ism_complex->AijMatrixLig_hbond,
+				      ism_complex->AijMatrix_hbond_prot,
+				      ism_complex->AijMatrixProt_hbond,
+				      ism_complex->OverlapsMatrix_hbond,
+				      ism_complex->OverlapsMatrixLig_hbond,
+				      ism_complex->OverlapsMatrix_hbond_prot,
+				      ism_complex->OverlapsMatrixProt_hbond, ism_complex->lcpoComps,
+				      &(ism_complex->atomSASAH));
 	  ism_getExternalOverlaps_forHbonds (prot, lig,
-					     &buried_prot_complex_hbond,
-					     &buried_lig_complex_hbond,
-					     &numOverlapsProtComplex_hbond,
-					     &numOverlapsLigComplex_hbond,
-					     &OverlapsMatrixProt_hbond,
-					     &OverlapsMatrixLig_hbond,
-					     &AijMatrixProt_hbond,
-					     &AijMatrixLig_hbond);
-	  ism_get_complex_sasa_hbond (prot, total_surface_prot,
-				      buried_hbond_prot,
-				      buried_prot_complex_hbond,
-				      numOverlaps_hbond_prot,
-				      numOverlapsProtComplex_hbond,
-				      numOverlaps_hbond,
-				      numOverlapsLigComplex_hbond,
-				      AijMatrix_hbond_prot,
-				      AijMatrixProt_hbond, AijMatrix_hbond,
-				      AijMatrixLig_hbond,
-				      OverlapsMatrix_hbond_prot,
-				      OverlapsMatrixProt_hbond,
-				      OverlapsMatrix_hbond,
-				      OverlapsMatrixLig_hbond, lcpoComps_prot,
-				      &atomSASAH_prot);
-	  calculate_ga (lig, prot, &ga, &ga_prot, verbose_flag);
+					     &(ism_complex->buried_prot_complex_hbond),
+					     &(ism_complex->buried_lig_complex_hbond),
+					     &(ism_complex->numOverlapsProtComplex_hbond),
+					     &(ism_complex->numOverlapsLigComplex_hbond),
+					     &(ism_complex->OverlapsMatrixProt_hbond),
+					     &(ism_complex->OverlapsMatrixLig_hbond),
+					     &(ism_complex->AijMatrixProt_hbond),
+					     &(ism_complex->AijMatrixLig_hbond));
+	  ism_get_complex_sasa_hbond (prot, ism_complex->total_surface_prot,
+				      ism_complex->buried_hbond_prot,
+				      ism_complex->buried_prot_complex_hbond,
+				      ism_complex->numOverlaps_hbond_prot,
+				      ism_complex->numOverlapsProtComplex_hbond,
+				      ism_complex->numOverlaps_hbond,
+				      ism_complex->numOverlapsLigComplex_hbond,
+				      ism_complex->AijMatrix_hbond_prot,
+				      ism_complex->AijMatrixProt_hbond, ism_complex->AijMatrix_hbond,
+				      ism_complex->AijMatrixLig_hbond,
+				      ism_complex->OverlapsMatrix_hbond_prot,
+				      ism_complex->OverlapsMatrixProt_hbond,
+				      ism_complex->OverlapsMatrix_hbond,
+				      ism_complex->OverlapsMatrixLig_hbond, ism_complex->lcpoComps_prot,
+				      &(ism_complex->atomSASAH_prot));
+	  calculate_ga (lig, prot, &(ism_complex->ga), &(ism_complex->ga_prot), verbose_flag);
+
 
 	  desolvR =
-	    ism_get_desolvation_energy (prot, lig, atomSASA_prot,
-					atomSASAComplex_prot, atomSASAH_prot,
-					ga_prot);
+	    ism_get_desolvation_energy (prot, lig, ism_complex->atomSASA_prot,
+					ism_complex->atomSASAComplex_prot, ism_complex->atomSASAH_prot,
+					ism_complex->ga_prot);
 	  desolvL =
-	    ism_get_desolvation_energy (lig, lig, atomSASA, atomSASAComplex,
-					atomSASAH, ga);
+	    ism_get_desolvation_energy (lig, lig, ism_complex->atomSASA, ism_complex->atomSASAComplex,
+					ism_complex->atomSASAH, ism_complex->ga);
 	  apolarcomplex =
-	    ism_get_apolar_energy (lig, prot, atomSASA, atomSASAComplex,
-				   total_surface, atomSASA_prot,
-				   atomSASAComplex_prot, total_surface_prot);
+	    ism_get_apolar_energy (lig, prot, ism_complex->atomSASA, ism_complex->atomSASAComplex,
+				   ism_complex->total_surface, ism_complex->atomSASA_prot,
+				   ism_complex->atomSASAComplex_prot, ism_complex->total_surface_prot);
 
 
 	  desolvEnergy = desolvL + desolvR + apolarcomplex;
@@ -1466,94 +1275,7 @@ main (argc, argv)
   fclose (f_pdb_byres);
   free (tmp_file_name);
 
-
-  free (ga);
-  free (ga_prot);
-  free (buried);
-  free (numOverlaps);
-  free (atomSASA);
-  free (atomSASAComplex);
-  free (atomSASAH);
-  free (total_surface);
-  free (buried_hbond);
-  free (numOverlaps_hbond);
-
-  for (i = 0; i < lig->n_atoms; i++)
-    {
-      free (lcpoComps[i]);
-      free (matrix[i]);
-    }
-  free (lcpoComps);
-  free (matrix);
-
-  for (i = 0; i < ISM_MAX_OVERLAPS; i++)
-    {
-      free (OverlapsMatrix[i]);
-      free (AijMatrix[i]);
-      free (OverlapsMatrix_hbond[i]);
-      free (AijMatrix_hbond[i]);
-    }
-  free (AijMatrix_hbond);
-  free (OverlapsMatrix_hbond);
-  free (AijMatrix);
-  free (OverlapsMatrix);
-
-
-
-  free (buried_lig_complex);
-  free (buried_prot_complex);
-  free (numOverlapsLigComplex);
-  free (numOverlapsProtComplex);
-  free (buried_lig_complex_hbond);
-  free (buried_prot_complex_hbond);
-  free (numOverlapsLigComplex_hbond);
-  free (numOverlapsProtComplex_hbond);
-
-  for (i = 0; i < ISM_MAX_OVERLAPS; i++)
-    {
-      free (OverlapsMatrixLig[i]);
-      free (OverlapsMatrixProt[i]);
-      free (AijMatrixLig[i]);
-      free (AijMatrixProt[i]);
-      free (OverlapsMatrixLig_hbond[i]);
-      free (OverlapsMatrixProt_hbond[i]);
-      free (AijMatrixLig_hbond[i]);
-      free (AijMatrixProt_hbond[i]);
-      free (OverlapsMatrix_prot[i]);
-      free (AijMatrix_hbond_prot[i]);
-      free (OverlapsMatrix_hbond_prot[i]);
-      free (AijMatrix_prot[i]);
-    }
-  free (AijMatrixLig);
-  free (AijMatrixProt);
-  free (OverlapsMatrixLig);
-  free (OverlapsMatrixProt);
-  free (OverlapsMatrixLig_hbond);
-  free (OverlapsMatrixProt_hbond);
-  free (AijMatrixLig_hbond);
-  free (AijMatrixProt_hbond);
-  free (OverlapsMatrix_prot);
-  free (AijMatrix_hbond_prot);
-  free (OverlapsMatrix_hbond_prot);
-  free (AijMatrix_prot);
-  free (buried_prot);
-  free (numOverlaps_prot);
-  free (total_surface_prot);
-  free (atomSASA_prot);
-  free (atomSASAComplex_prot);
-  free (atomSASAH_prot);
-
-  free (buried_hbond_prot);
-  free (numOverlaps_hbond_prot);
-
-  for (i = 0; i < prot->n_atoms; i++)
-    {
-      free (lcpoComps_prot[i]);
-
-    }
-  free (lcpoComps_prot);
-
-
+  ISM_cleanup(&ism_complex, lig, prot);
 
   for (i = 0; i < nres + 1; i++)
     {
@@ -1576,14 +1298,8 @@ main (argc, argv)
       cleanup (&mol);
     }
 
-  /*clean_amber_split_mol (&lig);*/
   cleanup (&lig);
-  /*clean_amber_split_mol (&prot);*/
   cleanup (&prot);
-
-  /*free (lig);
-  free (prot);*/
-
 
 }
 

@@ -56,9 +56,9 @@ assign_bond_types (MOL2 ** mymol)
 	    {
 	      if (dist <= 1.26 && dist >= 0.5)
 		order = 3;
-	      else if (dist > 1.26 && dist <= 1.35)
+	      else if (dist > 1.26 && dist <= 1.39) /* This was 1.35 before */
 		order = 2;
-	      else if (dist > 1.35 && dist <= 1.9)
+	      else if (dist > 1.39 && dist <= 1.9)
 		order = 1;
 	      /* C  - N or C=N */
 	    }

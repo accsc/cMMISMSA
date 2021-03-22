@@ -83,3 +83,58 @@ float LCPOParam4[31] = { 0.00007, 0.00012, 0.00026, 0.00000, 0.00000, 0.00001, 0
  *
  */
 
+
+typedef struct{
+  /* Desolvation */
+  /* Protein */
+  int *numOverlaps_prot;
+  int *buried_prot;
+  int **OverlapsMatrix_prot;
+  float **AijMatrix_prot;
+  float **lcpoComps_prot;
+  float *total_surface_prot;
+  float *atomSASA_prot;
+  float *atomSASAComplex_prot;
+  float *atomSASAH_prot;
+  /* Ligand */
+  float **matrix;
+  int *numOverlaps;
+  int *buried; 
+  int **OverlapsMatrix;
+  float **AijMatrix;
+  float **lcpoComps;
+  float *total_surface;
+  float *atomSASA; 
+  float *atomSASAComplex;
+  float *atomSASAH;
+  /* Complex */
+  int *buried_lig_complex; 
+  int *buried_prot_complex;
+  float **AijMatrixLig; 
+  float **AijMatrixProt;
+  int *numOverlapsLigComplex;
+  int *numOverlapsProtComplex;
+  int **OverlapsMatrixLig;
+  int **OverlapsMatrixProt;
+  /* H-bonds */
+  float *ga;
+  float *ga_prot;
+  /* Intra-molecular bonds */
+  int *numOverlaps_hbond_prot;
+  int *buried_hbond_prot;
+  int **OverlapsMatrix_hbond_prot;
+  float **AijMatrix_hbond_prot;
+  int *numOverlaps_hbond;
+  int *buried_hbond;
+  int **OverlapsMatrix_hbond;
+  float **AijMatrix_hbond;
+  /* Inter-molecular bonds */
+  int *buried_lig_complex_hbond;
+  int *buried_prot_complex_hbond;
+  float **AijMatrixLig_hbond; 
+  float **AijMatrixProt_hbond;
+  int *numOverlapsLigComplex_hbond;
+  int *numOverlapsProtComplex_hbond;
+  int **OverlapsMatrixLig_hbond;
+  int **OverlapsMatrixProt_hbond;
+} ISM_COMPLEX;
