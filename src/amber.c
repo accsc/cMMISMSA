@@ -366,6 +366,7 @@ void AMBER_atom_typing (MOL2 ** mymol)
     int i = 0, j = 0;
     MOL2 *mols = NULL;
     char *atom_name = NULL, *res_name = NULL;
+    int missing_flag = 0;
 
     mols = *mymol;
 
@@ -373,6 +374,7 @@ void AMBER_atom_typing (MOL2 ** mymol)
     {
         atom_name = mols->atom_names[i];
         res_name = mols->res_names[i];
+        missing_flag = 1;
 
         for(j = 0; j < 2257; j++)
         {
@@ -381,8 +383,41 @@ void AMBER_atom_typing (MOL2 ** mymol)
                 mols->vdw_parm1[i] = amber_vdw_epsilon[j];
                 mols->vdw_parm2[i] = amber_vdw_r0[j];
                 mols->pcharges[i] = amber_pcharges[j];
+                missing_flag = 0;
            }
         }
+
+        if( strcmp(res_name,"HIS") == 0)
+        {
+            for(j = 0; j < 2257; j++)
+            {
+               if ( (strcmp("HID", amber_res_names[j]) == 0) && (strcmp(trim(atom_name), amber_atom_names[j]) == 0))
+               {
+                    mols->vdw_parm1[i] = amber_vdw_epsilon[j];
+                    mols->vdw_parm2[i] = amber_vdw_r0[j];
+                    mols->pcharges[i] = amber_pcharges[j];
+                    missing_flag = 0;
+               }
+            }
+
+            if( missing_flag != 0)
+            {
+                for(j = 0; j < 2257; j++)
+                {  
+                   if ( (strcmp("HIE", amber_res_names[j]) == 0) && (strcmp(trim(atom_name), amber_atom_names[j]) == 0))
+                   {    
+                        mols->vdw_parm1[i] = amber_vdw_epsilon[j];
+                        mols->vdw_parm2[i] = amber_vdw_r0[j];
+                        mols->pcharges[i] = amber_pcharges[j];
+                        missing_flag = 0;
+                   }
+                }
+            }
+
+        }
+
+        if( missing_flag != 0)
+            fprintf(stderr,"Missing AMBER ff parameters for protein %s %s-%i\n", atom_name,res_name,mols->res_num[i]);
     }
 
     *mymol = mols;
