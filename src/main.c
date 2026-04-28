@@ -27,7 +27,13 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
 /*
- *      Rev 5 - February 2021
+ *  Patch 1 - April 2026
+ *        - Added a header to the _res output file with the residue number for
+ *        better parsing.
+ *        - Also include the total energy (sum of all energies) in that file
+ *        for a direct and easy comparison of per-residue total energies.
+ *
+ *  Rev 5 - February 2021
  *        - Fixed bugs in PDB atom typing and protein typing based on dictionary
  *        - Fixed bugs in PDB procesing (multichain systems)
  *        - Major code refactoring
@@ -673,6 +679,11 @@ main (argc, argv)
       fflush (stderr);
     }
 
+  for (j = 0; j < nres; j++) {
+      fprintf(f_res_step, "RES%d_Vdw;RES%d_qq;RES%d_ISM;RES%d_Total;", j+1,j+1,j+1,j+1); // Patch 1
+  }
+  fprintf (f_res_step, "\n");
+
   for (i = sframe; i < eframe; i = i + iframe)
     {
       if (verbose_flag)
@@ -872,6 +883,7 @@ main (argc, argv)
 
       /* Split desolvation by residue using MMres/MMall ratio */
       /* and do the averages also */
+
       for (j = 0; j < nres; j++)
 	{
 	  res_energies_details[j][2] +=
@@ -884,8 +896,12 @@ main (argc, argv)
 	  res_averages[j][1] += res_energies_details[j][0];
 	  res_averages[j][2] += res_energies_details[j][1];
 	  res_averages[j][3] += res_energies_details[j][2];
-	  fprintf (f_res_step, "%f;%f;%f;", res_energies_details[j][0],
-		   res_energies_details[j][1], res_energies_details[j][2]);
+	  fprintf (
+        f_res_step, "%f;%f;%f;%f;", // Patch 1
+        res_energies_details[j][0], res_energies_details[j][1], res_energies_details[j][2],
+        // Now include total energy
+        res_energies_details[j][0]+res_energies_details[j][1]+res_energies_details[j][2]
+      );
 	  res_energies_details[j][0] = 0.0f;
 	  res_energies_details[j][1] = 0.0f;
 	  res_energies_details[j][2] = 0.0f;
